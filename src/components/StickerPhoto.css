@@ -1,79 +1,76 @@
-.indicator{
+.sticker {
+  position: relative;
 
-    margin-top:90px;
+  width: 100%;
+  max-width: 480px;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    background:none;
-    border:none;
-
-    padding:0;
-
-    cursor:pointer;
-
-    width:240px;
-
-    transition:.4s;
-
+  margin: 0 auto;
 }
 
-.indicator svg{
+.photo-card {
+  position: relative;
+  z-index: 1;
 
-    overflow:visible;
+  padding: 30px 30px 52px;
 
+  background-image: url("../assets/paper-texture.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+
+  filter: drop-shadow(0 35px 55px rgba(0, 0, 0, .55));
 }
 
-.indicator-path{
+.photo {
+  display: block;
+  width: 100%;
 
-    fill:none;
+  object-fit: cover;
 
-    stroke:#ffffff;
+  transform: rotate(-1deg);
 
-    stroke-width:1.5;
-
-    stroke-linecap:round;
-
-    stroke-linejoin:round;
-
-    transition:stroke-dashoffset .08s linear;
-
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
 }
 
-.indicator-dot{
+.tape {
+  position: absolute;
+  z-index: 2;
+  top: -36px;
+  left: 50%;
 
-    fill:#ffffff;
+  width: 190px;
+  aspect-ratio: 560 / 388;
 
-    transition:
-        cx .08s linear,
-        cy .08s linear,
-        r .25s ease;
+  background-image: url("../assets/tape-texture.png");
+  background-size: contain;
+  background-repeat: no-repeat;
 
+  opacity: .92;
+
+  transform: translateX(-50%) rotate(-5deg);
+
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .4));
+
+  pointer-events: none;
 }
 
-.indicator:hover .indicator-dot{
+.photo-note {
+  margin-top: 20px;
+  margin-left: 8px;
 
-    r:7;
-
+  max-width: 260px;
 }
 
-.indicator-text{
+.photo-note .arrow {
+  display: block;
+  margin-bottom: 6px;
+}
 
-    fill:white;
+.photo-note p {
+  margin: 0;
 
-    font-size:18px;
+  color: #989898;
 
-    font-weight:300;
-
-    letter-spacing:.02em;
-
-    opacity:0;
-
-    transition:
-        opacity .35s ease,
-        transform .35s ease;
-
-    transform-origin:left center;
-
+  font-size: 15px;
+  line-height: 1.6;
+  font-style: italic;
 }

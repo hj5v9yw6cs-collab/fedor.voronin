@@ -1,13 +1,21 @@
 import "./StickerPhoto.css";
 import photo from "../assets/me.png";
+import paperTexture from "../assets/paper-texture.png";
+import tapeTexture from "../assets/tape-texture.png";
 
 export default function StickerPhoto() {
   return (
     <div className="sticker">
 
-      <div className="tape"></div>
+      <div
+        className="tape"
+        style={{ backgroundImage: `url(${tapeTexture})` }}
+      ></div>
 
-      <div className="photo-card">
+      <div
+        className="photo-card"
+        style={{ backgroundImage: `url(${paperTexture})` }}
+      >
 
         <img
           src={photo}
@@ -44,7 +52,7 @@ export default function StickerPhoto() {
 
 </div>
 
-     
+
 
     </div>
   );
