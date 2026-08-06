@@ -1,0 +1,53 @@
+.clover {
+  position: relative;
+  color: var(--fg);
+  flex-shrink: 0;
+}
+
+.clover-mark {
+  display: block;
+}
+
+.clover-seeds {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.clover-seed {
+  position: absolute;
+  top: 58%;
+  width: calc(5px * var(--seed-size, 1));
+  height: calc(12px * var(--seed-size, 1));
+  margin-left: -2.5px;
+  border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+  background: var(--accent);
+  opacity: 0;
+  animation: clover-seed-fall var(--seed-duration, 3.2s) ease-in infinite;
+  animation-delay: var(--seed-delay, 0s);
+}
+
+@keyframes clover-seed-fall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(var(--seed-x, 0), 150px) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-seed {
+    animation: none;
+    opacity: 0;
+  }
+}

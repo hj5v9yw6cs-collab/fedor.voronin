@@ -1,16 +1,44 @@
-# React + Vite
+# Fedor. — English Studio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Одностраничный сайт репетитора английского: история, шкала уровней,
+тест на определение уровня и форма связи. Дизайн-система (типографика,
+цвета, фирменный «клевер» с падающими семенами) построена по референсу
+masamadre.ru, адаптирована в тёмной палитре.
 
-Currently, two official plugins are available:
+## Разработка
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+## Тест и отправка результатов на почту
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Тест в разделе «Тест» (`src/components/Test.jsx`) в конце отправляет
+имя, контакт и результат на почту через
+[Web3Forms](https://web3forms.com) — бесплатный сервис «форма → email»,
+не требующий своего бэкенда.
 
-## Expanding the ESLint configuration
+Чтобы включить отправку:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Зайдите на [web3forms.com](https://web3forms.com) и создайте Access
+   Key на почту `fedor1349666666@gmail.com` (никаких платежей и
+   подтверждения телефона — только email).
+2. Скопируйте `.env.example` в `.env` и вставьте ключ:
+
+   ```
+   VITE_WEB3FORMS_KEY=ваш-ключ
+   ```
+
+3. Перезапустите `npm run dev` / пересоберите проект.
+
+Пока ключ не задан, при завершении теста у посетителя откроется
+почтовый клиент с уже заполненным письмом на
+`fedor1349666666@gmail.com` — так результаты не теряются даже без
+настройки сервиса.
+
+## Сборка
+
+```bash
+npm run build
+```

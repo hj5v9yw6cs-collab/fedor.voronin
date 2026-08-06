@@ -1,12 +1,12 @@
 import "./Hero.css";
 import StickerPhoto from "./StickerPhoto";
 import ScrollIndicator from "./ScrollIndicator";
+import Clover from "./Clover";
 
 export default function Hero() {
-  const scrollToStory = () => {
-    document.getElementById("story")?.scrollIntoView({
-      behavior: "smooth",
-    });
+  const scrollTo = (id) => (e) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -16,7 +16,7 @@ export default function Hero() {
         <div className="hero-left">
 
           <span className="hero-label">
-            ✦ АНГЛИЙСКИЙ С ФЕДОРОМ
+            английский с федором
           </span>
 
           <h1 className="hero-title">
@@ -35,13 +35,13 @@ export default function Hero() {
 
           <div className="hero-buttons">
 
-            <button className="primary-btn">
+            <button className="primary-btn" onClick={scrollTo("test")}>
               Пройти тест
             </button>
 
             <button
               className="secondary-btn"
-              onClick={scrollToStory}
+              onClick={scrollTo("story")}
             >
               Моя история
             </button>
@@ -53,6 +53,7 @@ export default function Hero() {
         </div>
 
         <div className="hero-right">
+          <Clover size={72} withSeeds className="hero-clover" />
           <StickerPhoto />
         </div>
 

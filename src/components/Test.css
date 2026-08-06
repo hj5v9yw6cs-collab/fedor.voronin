@@ -1,0 +1,164 @@
+.test {
+  background: var(--bg);
+  color: var(--fg);
+  padding: 90px 70px 120px;
+  border-top: 1px solid var(--line);
+}
+
+.test-container {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.test-label {
+  display: inline-block;
+  color: var(--fg-dim);
+  font-size: 13px;
+  letter-spacing: .35em;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+
+.test-intro h2,
+.test-contact h2,
+.test-result h2 {
+  font-family: var(--font-mono);
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  margin: 0 0 24px;
+}
+
+.test-intro p,
+.test-contact p,
+.test-result p {
+  color: var(--fg-dim);
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 40px;
+  max-width: 460px;
+}
+
+.test-btn {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  background: var(--fg);
+  color: var(--bg);
+  border: 1px solid var(--fg);
+  border-radius: 999px;
+  padding: 18px 36px;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.test-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--fg);
+}
+
+/* quiz step */
+
+.test-progress {
+  margin-bottom: 40px;
+}
+
+.test-progress span {
+  display: block;
+  color: var(--fg-dim);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.test-progress-bar {
+  height: 2px;
+  background: var(--line);
+}
+
+.test-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width .3s ease;
+}
+
+.test-question {
+  font-family: var(--font-mono);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 36px;
+}
+
+.test-options {
+  display: grid;
+  gap: 10px;
+}
+
+.test-option {
+  font-family: var(--font-mono);
+  text-align: left;
+  font-size: 16px;
+  color: var(--fg);
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 22px;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease;
+}
+
+.test-option:hover {
+  border-color: var(--fg);
+  background: var(--bg);
+}
+
+/* contact step */
+
+.test-contact {
+  display: flex;
+  flex-direction: column;
+}
+
+.test-contact input {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--fg);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 2px;
+  margin-bottom: 24px;
+  outline: none;
+  transition: border-color .2s ease;
+}
+
+.test-contact input::placeholder {
+  color: var(--fg-dim);
+}
+
+.test-contact input:focus {
+  border-color: var(--accent);
+}
+
+.test-contact .test-btn {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+/* result step */
+
+.test-result-code {
+  display: inline-block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: .1em;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 640px) {
+  .test {
+    padding: 90px 24px 100px;
+  }
+}

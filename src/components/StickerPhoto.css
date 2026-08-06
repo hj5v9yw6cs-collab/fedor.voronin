@@ -2,7 +2,7 @@
   position: relative;
 
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
 
   margin: 0 auto;
 }
@@ -11,50 +11,25 @@
   position: relative;
   z-index: 1;
 
-  padding: 30px 30px 52px;
+  padding: 14px;
 
-  background-image: url("../assets/paper-texture.png");
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-
-  filter: drop-shadow(0 35px 55px rgba(0, 0, 0, .55));
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 28px;
 }
 
 .photo {
   display: block;
   width: 100%;
+  aspect-ratio: 4 / 5;
 
   object-fit: cover;
 
-  transform: rotate(-1deg);
-
-  box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
-}
-
-.tape {
-  position: absolute;
-  z-index: 2;
-  top: -36px;
-  left: 50%;
-
-  width: 190px;
-  aspect-ratio: 560 / 388;
-
-  background-image: url("../assets/tape-texture.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-
-  opacity: .92;
-
-  transform: translateX(-50%) rotate(-5deg);
-
-  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .4));
-
-  pointer-events: none;
+  border-radius: 18px;
 }
 
 .photo-note {
-  margin-top: 20px;
+  margin-top: 24px;
   margin-left: 8px;
 
   max-width: 260px;
@@ -68,9 +43,8 @@
 .photo-note p {
   margin: 0;
 
-  color: #989898;
+  color: var(--fg-dim);
 
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.6;
-  font-style: italic;
 }
