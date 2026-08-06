@@ -1,0 +1,19 @@
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Story from "./components/Story";
+import Features from "./components/Features";
+import Test from "./components/Test";
+import Footer from "./components/Footer";
+
+export default function App() {
+  return (
+    <>
+      <Navbar />
+      <Hero />
+      <Story />
+      <Features />
+      <Test />
+      <Footer />
+    </>
+  );
+}
