@@ -2,8 +2,43 @@ import { useState } from "react";
 import "./Test.css";
 import { QUESTIONS, getLevel } from "../lib/testQuestions";
 import { sendTestResults } from "../lib/sendResults";
+import Ant from "./Ant";
 
 const EMPTY_ANSWERS = Array(QUESTIONS.length).fill(null);
+const CAN_SPEAK = typeof window !== "undefined" && "speechSynthesis" in window;
+
+function speak(text) {
+  if (!CAN_SPEAK) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "en-US";
+  utter.rate = 0.95;
+  window.speechSynthesis.speak(utter);
+}
+
+function ListenBlock({ text }) {
+  const [played, setPlayed] = useState(false);
+
+  if (!CAN_SPEAK) {
+    // No speech synthesis in this browser — fall back to a transcript
+    // rather than silently breaking the question.
+    return <p className="test-transcript">{text}</p>;
+  }
+
+  return (
+    <button
+      type="button"
+      className="test-listen"
+      onClick={() => {
+        speak(text);
+        setPlayed(true);
+      }}
+    >
+      <span className="test-listen-icon">{played ? "↻" : "▶"}</span>
+      {played ? "прослушать ещё раз" : "прослушать"}
+    </button>
+  );
+}
 
 export default function Test() {
   const [step, setStep] = useState("intro"); // intro | quiz | contact | sending | done
@@ -61,8 +96,13 @@ export default function Test() {
     setStep("done");
   };
 
+  const q = QUESTIONS[current];
+
   return (
     <section id="test" className="test">
+
+      <Ant edge="top" duration="28s" delay="14s" size={16} />
+
       <div className="test-container">
 
         <span className="test-label">тест</span>
@@ -72,12 +112,12 @@ export default function Test() {
             <h2>
               Узнайте свой
               <br />
-              уровень за 3 минуты.
+              уровень за 5 минут.
             </h2>
             <p>
-              {QUESTIONS.length} коротких вопросов на грамматику
-              и лексику. В конце — ваш уровень по шкале CEFR
-              и рекомендация, с чего начать.
+              {QUESTIONS.length} коротких заданий: грамматика, лексика,
+              текст на понимание прочитанного и аудирование. В конце —
+              ваш уровень по шкале CEFR и рекомендация, с чего начать.
             </p>
             <button className="test-btn" onClick={() => setStep("quiz")}>
               начать тест
@@ -97,10 +137,24 @@ export default function Test() {
               </div>
             </div>
 
-            <h3 className="test-question">{QUESTIONS[current].q}</h3>
+            {q.type === "reading" && (
+              <div className="test-passage">
+                <span className="test-kind">текст</span>
+                <p>{q.passage}</p>
+              </div>
+            )}
+
+            {q.type === "listening" && (
+              <div className="test-passage">
+                <span className="test-kind">аудирование</span>
+                <ListenBlock text={q.audioText} />
+              </div>
+            )}
+
+            <h3 className="test-question">{q.q}</h3>
 
             <div className="test-options">
-              {QUESTIONS[current].options.map((opt, i) => (
+              {q.options.map((opt, i) => (
                 <button key={i} className="test-option" onClick={() => pick(i)}>
                   {opt}
                 </button>

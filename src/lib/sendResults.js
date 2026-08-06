@@ -9,47 +9,52 @@ function buildMessage({ name, contact, score, total, level }) {
     `Результат: ${score}/${total} — уровень ${level.code} (${level.label})`,
     "",
     "Ответы:",
-    ...QUESTIONS.map((item, i) => `${i + 1}. ${item.q} — ${item.picked ?? "—"}`),
+    ...QUESTIONS.map((item, i) => {
+      const context = item.passage ?? item.audioText;
+      const contextLine = context ? ` [${item.type}: "${context}"]` : "";
+      const mark = item.picked === item.options[item.correct] ? "верно" : "неверно";
+      return `${i + 1}. ${item.q}${contextLine} — ответ: ${item.picked ?? "—"} (${mark})`;
+    }),
   ];
   return lines.join("\n");
 }
 
 /**
- * Sends a finished test to the owner's inbox.
+ * Sends a finished test to the owner's inbox via FormSubmit
+ * (https://formsubmit.co) — a free form-to-email relay that needs no
+ * signup or API key, just the destination address.
  *
- * Primary path: Web3Forms (a static-site-friendly form-to-email API, no
- * backend needed) — set VITE_WEB3FORMS_KEY in .env to enable it.
- * Fallback: opens the visitor's mail client with the results pre-filled,
- * so results still reach the owner even before that key is configured.
+ * IMPORTANT: the very first submission ever sent to an email address
+ * doesn't deliver — FormSubmit instead emails that address an
+ * "Activate your form" link. Someone has to click it once; every
+ * submission after that arrives normally. See README.
+ *
+ * If the request fails (offline, relay down, not yet activated with no
+ * way to know), we fall back to opening the visitor's mail client with
+ * the results pre-filled, so nothing is silently lost.
  */
 export async function sendTestResults({ name, contact, score, total, level, answers }) {
   const withPicks = QUESTIONS.map((item, i) => ({ ...item, picked: answers[i]?.text }));
   const message = buildMessage({ name, contact, score, total, level, answers: withPicks });
   const subject = `Результат теста — ${name || "аноним"} (${level.code})`;
 
-  const accessKey = import.meta.env.VITE_WEB3FORMS_KEY;
-
-  if (accessKey) {
-    try {
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: accessKey,
-          subject,
-          from_name: "Тест на сайте Fedor.",
-          name: name || "Аноним",
-          contact,
-          level: `${level.code} — ${level.label}`,
-          score: `${score}/${total}`,
-          message,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) return { ok: true, method: "email" };
-    } catch {
-      // network error — fall through to mailto below
-    }
+  try {
+    const res = await fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        _subject: subject,
+        _template: "box",
+        name: name || "Аноним",
+        contact,
+        level: `${level.code} — ${level.label}`,
+        score: `${score}/${total}`,
+        message,
+      }),
+    });
+    if (res.ok) return { ok: true, method: "email" };
+  } catch {
+    // network error — fall through to mailto below
   }
 
   const body = encodeURIComponent(message);

@@ -1,8 +1,11 @@
 import "./Story.css";
+import Ant from "./Ant";
 
 export default function Story() {
   return (
     <section id="story" className="story">
+
+      <Ant edge="top" duration="30s" delay="4s" />
 
       <div className="story-container">
 

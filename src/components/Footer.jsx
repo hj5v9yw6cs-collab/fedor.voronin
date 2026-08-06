@@ -1,5 +1,6 @@
 import "./Footer.css";
-import Clover from "./Clover";
+import Flower from "./Flower";
+import Ant from "./Ant";
 
 const YEAR = new Date().getFullYear();
 
@@ -11,11 +12,14 @@ function scrollTo(e, href) {
 export default function Footer() {
   return (
     <footer id="footer" className="site-footer">
+
+      <Ant edge="top" duration="32s" delay="6s" size={16} />
+
       <div className="footer-top">
 
         <div className="footer-brand">
           <div className="footer-brand-row">
-            <Clover size={26} />
+            <Flower size={26} />
             <span>Fedor.</span>
           </div>
           <p>
@@ -42,7 +46,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-mark">
-        <Clover size={100} withSeeds />
+        <Flower size={100} withPetals />
       </div>
 
       <div className="footer-bottom">

@@ -1,5 +1,6 @@
 import "./Navbar.css";
-import Clover from "./Clover";
+import Flower from "./Flower";
+import Ant from "./Ant";
 
 const LINKS = [
   { href: "#story", label: "история" },
@@ -18,7 +19,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar-inner">
         <a href="#" className="navbar-brand" onClick={(e) => scrollTo(e, "body")}>
-          <Clover size={30} />
+          <Flower size={30} />
           <div className="navbar-brand-text">
             <span className="navbar-name">Fedor.</span>
             <span className="navbar-tag">english studio</span>
@@ -41,6 +42,7 @@ export default function Navbar() {
           пройти тест
         </a>
       </div>
+      <Ant edge="bottom" duration="26s" delay="1s" size={16} />
     </header>
   );
 }

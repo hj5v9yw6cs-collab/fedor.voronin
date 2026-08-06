@@ -1,0 +1,57 @@
+.flower {
+  position: relative;
+  color: var(--fg);
+  flex-shrink: 0;
+}
+
+.flower-mark {
+  display: block;
+}
+
+.flower-petals {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.flower-petal {
+  position: absolute;
+  top: 54%;
+  width: calc(7px * var(--petal-size, 1));
+  height: calc(15px * var(--petal-size, 1));
+  margin-left: -3.5px;
+  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+  background: var(--fg);
+  opacity: 0;
+  animation: flower-petal-fall var(--petal-duration, 3.4s) ease-in infinite;
+  animation-delay: var(--petal-delay, 0s);
+}
+
+.flower-petal:nth-child(3n) {
+  background: var(--accent);
+}
+
+@keyframes flower-petal-fall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(var(--petal-x, 0), 150px) rotate(var(--petal-spin, 180deg));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flower-petal {
+    animation: none;
+    opacity: 0;
+  }
+}

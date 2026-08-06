@@ -1,4 +1,5 @@
 .test {
+  position: relative;
   background: var(--bg);
   color: var(--fg);
   padding: 90px 70px 120px;
@@ -80,6 +81,63 @@
   height: 100%;
   background: var(--accent);
   transition: width .3s ease;
+}
+
+.test-passage {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 28px;
+}
+
+.test-kind {
+  display: block;
+  color: var(--fg-dim);
+  font-size: 11px;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.test-passage p {
+  margin: 0;
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.test-transcript {
+  color: var(--fg-dim);
+  font-style: italic;
+}
+
+.test-listen {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--fg);
+
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 12px 20px;
+
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease;
+}
+
+.test-listen:hover {
+  border-color: var(--fg);
+  background: var(--bg);
+}
+
+.test-listen-icon {
+  color: var(--accent);
+  font-size: 13px;
 }
 
 .test-question {

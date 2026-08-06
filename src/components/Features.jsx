@@ -1,4 +1,5 @@
 import "./Features.css";
+import Ant from "./Ant";
 
 const LEVELS = [
   { code: "A1–A2", label: "Начальный", desc: "Базовые фразы, простые диалоги." },
@@ -10,6 +11,9 @@ const LEVELS = [
 export default function Features() {
   return (
     <section className="features">
+
+      <Ant edge="top" duration="34s" delay="9s" size={16} />
+
       <div className="features-container">
 
         <span className="features-label">уровни</span>

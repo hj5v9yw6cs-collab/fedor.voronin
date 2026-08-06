@@ -1,7 +1,7 @@
 import "./Hero.css";
 import StickerPhoto from "./StickerPhoto";
 import ScrollIndicator from "./ScrollIndicator";
-import Clover from "./Clover";
+import Flower from "./Flower";
 
 export default function Hero() {
   const scrollTo = (id) => (e) => {
@@ -53,7 +53,7 @@ export default function Hero() {
         </div>
 
         <div className="hero-right">
-          <Clover size={72} withSeeds className="hero-clover" />
+          <Flower size={72} withPetals className="hero-flower" />
           <StickerPhoto />
         </div>
 

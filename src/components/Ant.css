@@ -1,0 +1,100 @@
+.ant-walker {
+  position: absolute;
+  left: -24px;
+  z-index: 3;
+
+  color: var(--fg-dim);
+  pointer-events: none;
+
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-duration: var(--ant-duration, 24s);
+  animation-delay: var(--ant-delay, 0s);
+}
+
+.ant-top {
+  top: 0;
+  animation-name: ant-walk-top;
+}
+
+.ant-bottom {
+  bottom: 0;
+  animation-name: ant-walk-bottom;
+}
+
+.ant-legs {
+  animation: ant-scuttle 0.28s steps(2, end) infinite;
+  transform-origin: center;
+}
+
+@keyframes ant-walk-top {
+  0% {
+    left: -24px;
+    transform: translateY(-50%) scaleX(1);
+  }
+  49% {
+    left: calc(100% + 24px);
+    transform: translateY(-50%) scaleX(1);
+  }
+  50% {
+    left: calc(100% + 24px);
+    transform: translateY(-50%) scaleX(-1);
+  }
+  99% {
+    left: -24px;
+    transform: translateY(-50%) scaleX(-1);
+  }
+  100% {
+    left: -24px;
+    transform: translateY(-50%) scaleX(1);
+  }
+}
+
+@keyframes ant-walk-bottom {
+  0% {
+    left: -24px;
+    transform: translateY(50%) scaleX(1);
+  }
+  49% {
+    left: calc(100% + 24px);
+    transform: translateY(50%) scaleX(1);
+  }
+  50% {
+    left: calc(100% + 24px);
+    transform: translateY(50%) scaleX(-1);
+  }
+  99% {
+    left: -24px;
+    transform: translateY(50%) scaleX(-1);
+  }
+  100% {
+    left: -24px;
+    transform: translateY(50%) scaleX(1);
+  }
+}
+
+@keyframes ant-scuttle {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-0.6px);
+  }
+}
+
+@media (max-width: 640px) {
+  .ant-walker {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ant-walker {
+    animation: none;
+    left: 40%;
+    transform: translateY(-50%);
+  }
+  .ant-legs {
+    animation: none;
+  }
+}
