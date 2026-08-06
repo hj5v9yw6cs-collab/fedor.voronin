@@ -23,6 +23,20 @@ export default function ScrollIndicator() {
     const svgText = text.current;
     const el = root.current;
 
+    // Anchor the indicator exactly where it used to sit in the document
+    // flow, right under the hero buttons, then keep it pinned there on
+    // screen (position: fixed) so it never scrolls away.
+    const placeAnchor = () => {
+      const buttons = document.querySelector(".hero-buttons");
+      if (!buttons) return;
+      const rect = buttons.getBoundingClientRect();
+      el.style.left = `${rect.left}px`;
+      el.style.top = `${window.scrollY + rect.bottom + 28}px`;
+    };
+
+    placeAnchor();
+    window.addEventListener("resize", placeAnchor);
+
     const totalLength = svgPath.getTotalLength();
 
     gsap.set(svgPath, {
@@ -44,6 +58,7 @@ export default function ScrollIndicator() {
         endTrigger: "#story",
         end: "bottom bottom",
         scrub: true,
+        onRefresh: placeAnchor,
       },
     });
 
@@ -80,6 +95,8 @@ export default function ScrollIndicator() {
       duration: 0.15,
     }, 0.85);
 
+    return () => window.removeEventListener("resize", placeAnchor);
+
   }, { scope: root });
 
   const scrollToStory = () => {
@@ -97,10 +114,9 @@ export default function ScrollIndicator() {
     >
 
       <svg
-        width="100%"
-        height="100%"
-        viewBox="0 0 150 720"
-        preserveAspectRatio="none"
+        width="200"
+        height="220"
+        viewBox="0 0 200 220"
       >
 
         <path
@@ -108,9 +124,9 @@ export default function ScrollIndicator() {
           className="indicator-path"
           d="
             M40 0
-            L40 300
-            Q40 340 80 340
-            L80 680
+            L40 90
+            Q40 120 70 120
+            L70 210
           "
           fill="none"
         />
@@ -126,8 +142,8 @@ export default function ScrollIndicator() {
         <text
           ref={text}
           className="indicator-text"
-          x="94"
-          y="684"
+          x="84"
+          y="214"
         >
           Моя история
         </text>

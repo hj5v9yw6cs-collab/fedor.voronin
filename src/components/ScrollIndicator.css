@@ -2,11 +2,9 @@
   position: fixed;
   z-index: 40;
 
-  left: 28px;
-  top: 130px;
-  bottom: 60px;
-
-  width: 150px;
+  /* left/top are set from JS, anchored to the hero buttons' position */
+  width: 200px;
+  height: 220px;
 
   display: flex;
   justify-content: center;
