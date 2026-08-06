@@ -2,24 +2,15 @@ import { useState } from "react";
 import "./Test.css";
 import { QUESTIONS, getLevel } from "../lib/testQuestions";
 import { sendTestResults } from "../lib/sendResults";
+import { speak, canSpeak } from "../lib/speak";
 import Ant from "./Ant";
 
 const EMPTY_ANSWERS = Array(QUESTIONS.length).fill(null);
-const CAN_SPEAK = typeof window !== "undefined" && "speechSynthesis" in window;
-
-function speak(text) {
-  if (!CAN_SPEAK) return;
-  window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "en-US";
-  utter.rate = 0.95;
-  window.speechSynthesis.speak(utter);
-}
 
 function ListenBlock({ text }) {
   const [played, setPlayed] = useState(false);
 
-  if (!CAN_SPEAK) {
+  if (!canSpeak) {
     // No speech synthesis in this browser — fall back to a transcript
     // rather than silently breaking the question.
     return <p className="test-transcript">{text}</p>;
@@ -28,7 +19,7 @@ function ListenBlock({ text }) {
   return (
     <button
       type="button"
-      className="test-listen"
+      className="test-listen btn-burst"
       onClick={() => {
         speak(text);
         setPlayed(true);
@@ -119,7 +110,7 @@ export default function Test() {
               текст на понимание прочитанного и аудирование. В конце —
               ваш уровень по шкале CEFR и рекомендация, с чего начать.
             </p>
-            <button className="test-btn" onClick={() => setStep("quiz")}>
+            <button className="test-btn btn-burst" onClick={() => setStep("quiz")}>
               начать тест
             </button>
           </div>
@@ -155,7 +146,7 @@ export default function Test() {
 
             <div className="test-options">
               {q.options.map((opt, i) => (
-                <button key={i} className="test-option" onClick={() => pick(i)}>
+                <button key={i} className="test-option btn-burst" onClick={() => pick(i)}>
                   {opt}
                 </button>
               ))}
@@ -183,7 +174,7 @@ export default function Test() {
               onChange={(e) => setContact(e.target.value)}
             />
 
-            <button type="submit" className="test-btn">
+            <button type="submit" className="test-btn btn-burst">
               получить результат
             </button>
           </form>
@@ -204,7 +195,7 @@ export default function Test() {
               <br />
               Результат также отправлен на почту — скоро свяжусь с вами.
             </p>
-            <button className="test-btn" onClick={reset}>
+            <button className="test-btn btn-burst" onClick={reset}>
               пройти ещё раз
             </button>
           </div>

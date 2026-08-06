@@ -19,7 +19,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar-inner">
         <a href="#" className="navbar-brand" onClick={(e) => scrollTo(e, "body")}>
-          <Flower size={30} />
+          <Flower size={30} fallDistance={42} />
           <div className="navbar-brand-text">
             <span className="navbar-name">Fedor.</span>
             <span className="navbar-tag">english studio</span>
@@ -36,7 +36,7 @@ export default function Navbar() {
 
         <a
           href="#test"
-          className="navbar-cta"
+          className="navbar-cta btn-burst"
           onClick={(e) => scrollTo(e, "#test")}
         >
           пройти тест

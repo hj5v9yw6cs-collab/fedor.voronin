@@ -5,53 +5,49 @@
 }
 
 .flower-mark {
+  position: relative;
+  z-index: 2;
   display: block;
 }
 
-.flower-petals {
+.flower-fallen {
   position: absolute;
   inset: 0;
   overflow: visible;
   pointer-events: none;
+  z-index: 1;
 }
 
-.flower-petal {
+.flower-petal-fallen {
   position: absolute;
-  top: 54%;
-  width: calc(7px * var(--petal-size, 1));
-  height: calc(15px * var(--petal-size, 1));
-  margin-left: -3.5px;
-  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+  transform: translate(-50%, -50%);
+
   background: var(--fg);
-  opacity: 0;
-  animation: flower-petal-fall var(--petal-duration, 3.4s) ease-in infinite;
-  animation-delay: var(--petal-delay, 0s);
+  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+
+  animation: petal-drop 0.9s cubic-bezier(0.33, 0, 0.2, 1) forwards;
 }
 
-.flower-petal:nth-child(3n) {
-  background: var(--accent);
+.flower-petal-fallen:nth-child(3n) {
+  background: color-mix(in srgb, var(--fg) 80%, var(--accent) 20%);
 }
 
-@keyframes flower-petal-fall {
+@keyframes petal-drop {
   0% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 0;
+    transform: translate(-50%, -50%) rotate(0deg);
   }
-  12% {
-    opacity: 1;
-  }
-  82% {
-    opacity: 0.9;
+  70% {
+    transform: translate(calc(-50% + var(--land-x, 0px)), calc(-50% + var(--land-y, 90px)))
+      rotate(var(--land-rot, 20deg));
   }
   100% {
-    transform: translate(var(--petal-x, 0), 150px) rotate(var(--petal-spin, 180deg));
-    opacity: 0;
+    transform: translate(calc(-50% + var(--land-x, 0px)), calc(-50% + var(--land-y, 90px)))
+      rotate(var(--land-rot, 20deg));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flower-petal {
-    animation: none;
-    opacity: 0;
+  .flower-petal-fallen {
+    animation-duration: 0.01s;
   }
 }

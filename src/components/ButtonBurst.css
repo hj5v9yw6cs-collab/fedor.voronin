@@ -1,0 +1,50 @@
+.burst-layer {
+  position: fixed;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 300;
+}
+
+.burst-group {
+  position: fixed;
+  width: 0;
+  height: 0;
+}
+
+.burst-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.5px;
+  height: 13px;
+  margin-left: -0.75px;
+
+  background: var(--fg);
+  border-radius: 2px;
+
+  opacity: 0;
+  animation: burst-fly 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+.burst-line:nth-child(4n) {
+  background: var(--accent);
+}
+
+@keyframes burst-fly {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--burst-angle)) translateY(-6px) scaleY(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--burst-angle)) translateY(calc(-1 * var(--burst-dist))) scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst-line {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -46,16 +46,16 @@ export default function Footer() {
       </div>
 
       <div className="footer-mark">
-        <Flower size={100} withPetals />
+        <Flower size={100} fallDistance={130} />
       </div>
 
       <div className="footer-bottom">
         <span>© {YEAR} Fedor. English Studio</span>
 
         <div className="footer-lang">
-          <button className="is-active">RU</button>
+          <button className="is-active btn-burst">RU</button>
           <span>/</span>
-          <button>EN</button>
+          <button className="btn-burst">EN</button>
         </div>
       </div>
     </footer>

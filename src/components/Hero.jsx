@@ -35,12 +35,12 @@ export default function Hero() {
 
           <div className="hero-buttons">
 
-            <button className="primary-btn" onClick={scrollTo("test")}>
+            <button className="primary-btn btn-burst" onClick={scrollTo("test")}>
               Пройти тест
             </button>
 
             <button
-              className="secondary-btn"
+              className="secondary-btn btn-burst"
               onClick={scrollTo("story")}
             >
               Моя история
@@ -53,7 +53,7 @@ export default function Hero() {
         </div>
 
         <div className="hero-right">
-          <Flower size={72} withPetals className="hero-flower" />
+          <Flower size={72} fallDistance={140} className="hero-flower" />
           <StickerPhoto />
         </div>
 

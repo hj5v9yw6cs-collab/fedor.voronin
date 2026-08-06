@@ -22,9 +22,54 @@
   animation-name: ant-walk-bottom;
 }
 
-.ant-legs {
-  animation: ant-scuttle 0.28s steps(2, end) infinite;
-  transform-origin: center;
+/* Whole-body bob, on top of the walking translation/flip above, synced
+   to the leg cadence for a bit of a scuttle. */
+.ant-body-bob {
+  animation: ant-bob 0.28s ease-in-out infinite;
+}
+
+/* Alternating tripod gait: legs a (front-left, back-left, mid-right)
+   swing one way while legs b (mid-left, front-right, back-right) swing
+   the other, then they switch — like a real 6-legged walk. */
+.ant-leg {
+  animation-duration: 0.28s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.ant-leg-a {
+  animation-name: leg-swing-a;
+}
+
+.ant-leg-b {
+  animation-name: leg-swing-b;
+}
+
+@keyframes leg-swing-a {
+  0%, 100% {
+    transform: rotate(-9deg);
+  }
+  50% {
+    transform: rotate(9deg);
+  }
+}
+
+@keyframes leg-swing-b {
+  0%, 100% {
+    transform: rotate(9deg);
+  }
+  50% {
+    transform: rotate(-9deg);
+  }
+}
+
+@keyframes ant-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.7px);
+  }
 }
 
 @keyframes ant-walk-top {
@@ -73,15 +118,6 @@
   }
 }
 
-@keyframes ant-scuttle {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-0.6px);
-  }
-}
-
 @media (max-width: 640px) {
   .ant-walker {
     display: none;
@@ -94,7 +130,8 @@
     left: 40%;
     transform: translateY(-50%);
   }
-  .ant-legs {
+  .ant-leg,
+  .ant-body-bob {
     animation: none;
   }
 }
