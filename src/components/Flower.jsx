@@ -17,17 +17,19 @@ const PETALS = [
   { angle: 315, x: 33, y: 33 },
 ];
 
-// Hand-picked scatter so the 8 shed petals don't land in one identical
-// spot — a bit of sideways drift and a resting tilt each.
+// Landing spots for the 8 shed petals — tight together (a small pile,
+// not scattered) and rotated to ~90°, so a petal that stood upright on
+// the flower ends up lying on its side once it lands, like it's really
+// resting flat on the surface below rather than floating at an angle.
 const LANDING = [
-  { dx: -22, rot: -35 },
-  { dx: 14, rot: 22 },
-  { dx: -8, rot: 55 },
-  { dx: 26, rot: -18 },
-  { dx: -32, rot: 12 },
-  { dx: 6, rot: -48 },
-  { dx: 34, rot: 32 },
-  { dx: -14, rot: -22 },
+  { dx: -10, rot: 84, dy: 0 },
+  { dx: 6, rot: -92, dy: 5 },
+  { dx: -4, rot: 96, dy: 11 },
+  { dx: 12, rot: -84, dy: 3 },
+  { dx: -13, rot: 90, dy: 15 },
+  { dx: 2, rot: -100, dy: 8 },
+  { dx: 9, rot: 88, dy: 18 },
+  { dx: -6, rot: -95, dy: 13 },
 ];
 
 const REDUCED_MOTION =
@@ -114,7 +116,7 @@ export default function Flower({ size = 96, fallDistance = 90, className = "" })
                 width: petalW,
                 height: petalH,
                 "--land-x": `${land.dx}px`,
-                "--land-y": `${fallDistance}px`,
+                "--land-y": `${fallDistance + land.dy}px`,
                 "--land-rot": `${land.rot}deg`,
               }}
             />

@@ -51,19 +51,19 @@ export function useTypedBlocks(blocks) {
       if (i >= text.length) {
         timer = setTimeout(() => {
           if (!cancelled) setActiveIndex((idx) => idx + 1);
-        }, 350);
+        }, 180);
         return;
       }
 
       const justTyped = text[i - 1];
-      let delay = 9 + Math.random() * 16;
-      if (".,!?—…".includes(justTyped)) delay += 160 + Math.random() * 220;
-      if (Math.random() < 0.02) delay += 300 + Math.random() * 450; // a beat to think
+      let delay = 3 + Math.random() * 7;
+      if (".,!?—…".includes(justTyped)) delay += 70 + Math.random() * 110;
+      if (Math.random() < 0.012) delay += 140 + Math.random() * 260; // a beat to think
 
       timer = setTimeout(tick, delay);
     };
 
-    timer = setTimeout(tick, 150);
+    timer = setTimeout(tick, 80);
     return () => {
       cancelled = true;
       clearTimeout(timer);

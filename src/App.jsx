@@ -5,7 +5,6 @@ import Features from "./components/Features";
 import Test from "./components/Test";
 import Footer from "./components/Footer";
 import ButtonBurst from "./components/ButtonBurst";
-import CustomCursor from "./components/CustomCursor";
 
 export default function App() {
   return (
@@ -17,7 +16,6 @@ export default function App() {
       <Test />
       <Footer />
       <ButtonBurst />
-      <CustomCursor />
     </>
   );
 }

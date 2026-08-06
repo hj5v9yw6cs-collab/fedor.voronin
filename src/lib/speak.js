@@ -5,6 +5,18 @@
 // warmth instead of the flat default.
 const CAN_SPEAK = typeof window !== "undefined" && "speechSynthesis" in window;
 
+// Specific voice names known to be the high-quality neural/premium tier
+// on their platform, ranked above a generic "sounds natural-ish" text
+// match. Edge/Windows ships "Online (Natural)" neural voices for free;
+// Safari/iOS ships "Enhanced"/"Premium" ones; Chrome on some platforms
+// exposes Google's WaveNet-backed voices under plain names.
+const KNOWN_GOOD = [
+  /online \(natural\)/i, // Edge neural voices, e.g. "Microsoft Aria Online (Natural)"
+  /\(enhanced\)/i, // Safari/macOS/iOS enhanced voices
+  /\(premium\)/i, // Safari/macOS/iOS premium voices
+  /google (us|uk) english/i, // Chrome's higher-quality built-ins
+];
+
 let voicesReady;
 
 function ensureVoices() {
@@ -30,17 +42,20 @@ function ensureVoices() {
 }
 
 function pickVoice(voices) {
+  const english = voices.filter((v) => /^en/i.test(v.lang));
+  const pool = english.length ? english : voices;
+
   const score = (v) => {
     let s = 0;
-    if (/^en/i.test(v.lang)) s += 10;
     if (/en-US|en-GB/i.test(v.lang)) s += 2;
-    // Higher-quality synthesis engines tend to flag themselves this way
-    // (Edge's "... Online (Natural)", Safari's "(Enhanced)"/"(Premium)").
-    if (/natural|neural|enhanced|premium/i.test(v.name)) s += 8;
+    const knownIdx = KNOWN_GOOD.findIndex((re) => re.test(v.name));
+    if (knownIdx !== -1) s += 20 - knownIdx; // earlier entries rank higher
+    else if (/natural|neural|enhanced|premium/i.test(v.name)) s += 8;
     if (v.localService) s += 1;
     return s;
   };
-  return voices.slice().sort((a, b) => score(b) - score(a))[0] ?? null;
+
+  return pool.slice().sort((a, b) => score(b) - score(a))[0] ?? null;
 }
 
 export async function speak(text) {
@@ -53,8 +68,8 @@ export async function speak(text) {
   const utter = new SpeechSynthesisUtterance(text);
   if (voice) utter.voice = voice;
   utter.lang = voice?.lang || "en-US";
-  utter.rate = 0.93; // a touch slower than default — reads less clipped
-  utter.pitch = 1.04; // a touch brighter than the flat default pitch
+  utter.rate = 0.95; // close to natural pace — too slow reads as robotic too
+  utter.pitch = 1.0; // let the voice's own pitch carry it, no artificial tilt
 
   window.speechSynthesis.speak(utter);
 }
