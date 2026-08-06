@@ -19,7 +19,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar-inner">
         <a href="#" className="navbar-brand" onClick={(e) => scrollTo(e, "body")}>
-          <Flower size={30} fallDistance={42} />
+          <Flower size={30} floorSelector=".navbar" floorEdge="bottom" />
           <div className="navbar-brand-text">
             <span className="navbar-name">Fedor.</span>
             <span className="navbar-tag">english studio</span>

@@ -17,37 +17,132 @@ const PETALS = [
   { angle: 315, x: 33, y: 33 },
 ];
 
-// Landing spots for the 8 shed petals — tight together (a small pile,
-// not scattered) and rotated to ~90°, so a petal that stood upright on
-// the flower ends up lying on its side once it lands, like it's really
-// resting flat on the surface below rather than floating at an angle.
-const LANDING = [
-  { dx: -10, rot: 84, dy: 0 },
-  { dx: 6, rot: -92, dy: 5 },
-  { dx: -4, rot: 96, dy: 11 },
-  { dx: 12, rot: -84, dy: 3 },
-  { dx: -13, rot: 90, dy: 15 },
-  { dx: 2, rot: -100, dy: 8 },
-  { dx: 9, rot: 88, dy: 18 },
-  { dx: -6, rot: -95, dy: 13 },
-];
-
 const REDUCED_MOTION =
   typeof window !== "undefined" &&
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+const GRAVITY = 2600; // px/s²
+
+/**
+ * Drops one shed petal with actual gravity — accelerates downward,
+ * drifts a little sideways, tumbles as it falls. It settles on the
+ * first real surface it reaches: either the flower's measured floor
+ * (floorSelector/floorEdge), or — if it comes down where an earlier
+ * petal already landed — the top of that petal instead, the same way
+ * it would land on solid ground; either way it stops there for good
+ * and doesn't sink through. `landedRef` is the shared list of what's
+ * already down, so the pile builds up naturally rather than every
+ * petal falling straight to the ground through each other.
+ */
+function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, floorPadding, landedRef }) {
+  const flowerRect = container.getBoundingClientRect();
+  const startX = (attach.x / 100) * flowerRect.width;
+  const startY = (attach.y / 100) * flowerRect.height;
+
+  const floorEl = floorSelector ? document.querySelector(floorSelector) : null;
+  const floorY = floorEl
+    ? (floorEdge === "bottom"
+        ? floorEl.getBoundingClientRect().bottom
+        : floorEl.getBoundingClientRect().top) - floorPadding
+    : flowerRect.top + startY + 90;
+
+  // Ground floor, expressed relative to this petal's own start point.
+  const groundFloor = Math.max(14, floorY - flowerRect.top) - startY;
+
+  const petalW = size * 0.13; // short axis — its thickness once lying flat
+  const petalH = size * 0.3; // long axis — its footprint once lying flat
+
+  const el = document.createElement("span");
+  el.className = "flower-petal-fallen";
+  el.style.left = `${attach.x}%`;
+  el.style.top = `${attach.y}%`;
+  el.style.width = `${Math.round(petalW)}px`;
+  el.style.height = `${Math.round(petalH)}px`;
+  layer.appendChild(el);
+
+  const settleRot = (Math.random() < 0.5 ? 1 : -1) * (80 + Math.random() * 20);
+
+  const land = (x, floor) => {
+    landedRef.current.push({
+      cx: startX + x,
+      topY: startY + floor - petalW / 2,
+      halfSpan: petalH / 2,
+    });
+  };
+
+  if (REDUCED_MOTION) {
+    el.style.transform = `translate(-50%, -50%) translate(0, ${groundFloor}px) rotate(${settleRot}deg)`;
+    land(0, groundFloor);
+    return;
+  }
+
+  let x = 0;
+  let y = 0;
+  let vx = (Math.random() - 0.5) * 90;
+  let vy = -30 - Math.random() * 50;
+  let rot = 0;
+  let last = performance.now();
+
+  const currentFloor = () => {
+    let floor = groundFloor;
+    for (const p of landedRef.current) {
+      if (Math.abs(startX + x - p.cx) < p.halfSpan + petalH / 2) {
+        const local = p.topY - startY;
+        if (local < floor) floor = local;
+      }
+    }
+    return floor;
+  };
+
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.032);
+    last = now;
+
+    vy += GRAVITY * dt;
+    y += vy * dt;
+    x += vx * dt;
+    vx *= Math.max(0, 1 - 3 * dt);
+    rot += vx * dt * 3.5;
+
+    const floor = currentFloor();
+    if (y >= floor) {
+      el.style.transition = "transform .16s ease-out";
+      el.style.transform = `translate(-50%, -50%) translate(${x}px, ${floor}px) rotate(${settleRot}deg)`;
+      land(x, floor);
+      return;
+    }
+
+    el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rot}deg)`;
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
+
 /**
  * The site's brand mark — a daisy. It starts whole; once it scrolls
  * into view, its petals tear off one at a time (the mark itself has
- * fewer and fewer petals) and drop straight down onto whatever sits
- * below it, coming to rest there for good — they don't fade or loop,
- * they just stay fallen. Once every petal is gone, only the center
- * (and its little stem) is left.
+ * fewer and fewer petals) and fall — real gravity, not a canned
+ * animation — onto a specific surface below it (`floorSelector`), or
+ * onto each other once the pile builds up, and stay there for good.
+ * Once every petal is gone, only the center (and its little stem) is
+ * left.
+ *
+ * `floorSelector` is a CSS selector for the element whose edge acts as
+ * the ground; `floorEdge` picks which edge ("top" or "bottom").
  */
-export default function Flower({ size = 96, fallDistance = 90, className = "" }) {
+export default function Flower({
+  size = 96,
+  floorSelector,
+  floorEdge = "top",
+  floorPadding = 0,
+  className = "",
+}) {
   const [shed, setShed] = useState(0);
   const rootRef = useRef(null);
+  const layerRef = useRef(null);
   const startedRef = useRef(false);
+  const landedRef = useRef([]);
 
   useEffect(() => {
     const el = rootRef.current;
@@ -55,9 +150,23 @@ export default function Flower({ size = 96, fallDistance = 90, className = "" })
 
     const shedAll = () => {
       startedRef.current = true;
-      const step = REDUCED_MOTION ? 0 : 550;
-      PETALS.forEach((_, i) => {
-        setTimeout(() => setShed((n) => Math.max(n, i + 1)), i * step + 250);
+      const step = REDUCED_MOTION ? 0 : 480;
+      PETALS.forEach((p, i) => {
+        setTimeout(() => {
+          setShed((n) => Math.max(n, i + 1));
+          if (rootRef.current && layerRef.current) {
+            dropPetal({
+              layer: layerRef.current,
+              container: rootRef.current,
+              attach: p,
+              size,
+              floorSelector,
+              floorEdge,
+              floorPadding,
+              landedRef,
+            });
+          }
+        }, i * step + 250);
       });
     };
 
@@ -73,10 +182,8 @@ export default function Flower({ size = 96, fallDistance = 90, className = "" })
 
     observer.observe(el);
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const petalW = Math.round(size * 0.13);
-  const petalH = Math.round(size * 0.3);
 
   return (
     <div
@@ -103,26 +210,7 @@ export default function Flower({ size = 96, fallDistance = 90, className = "" })
         <rect x="47" y="80" width="6" height="18" rx="3" fill="currentColor" />
       </svg>
 
-      <div className="flower-fallen">
-        {PETALS.slice(0, shed).map((p, i) => {
-          const land = LANDING[i % LANDING.length];
-          return (
-            <span
-              key={p.angle}
-              className="flower-petal-fallen"
-              style={{
-                left: `${p.x}%`,
-                top: `${p.y}%`,
-                width: petalW,
-                height: petalH,
-                "--land-x": `${land.dx}px`,
-                "--land-y": `${fallDistance + land.dy}px`,
-                "--land-rot": `${land.rot}deg`,
-              }}
-            />
-          );
-        })}
-      </div>
+      <div ref={layerRef} className="flower-fallen" />
     </div>
   );
 }

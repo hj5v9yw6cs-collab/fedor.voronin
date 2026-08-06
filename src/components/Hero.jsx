@@ -53,7 +53,12 @@ export default function Hero() {
         </div>
 
         <div className="hero-right">
-          <Flower size={72} fallDistance={140} className="hero-flower" />
+          <Flower
+            size={72}
+            floorSelector=".photo-card"
+            floorEdge="top"
+            className="hero-flower"
+          />
           <StickerPhoto />
         </div>
 

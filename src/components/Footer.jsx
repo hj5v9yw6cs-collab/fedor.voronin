@@ -19,7 +19,7 @@ export default function Footer() {
 
         <div className="footer-brand">
           <div className="footer-brand-row">
-            <Flower size={26} />
+            <Flower size={26} floorSelector=".footer-brand" floorEdge="bottom" />
             <span>Fedor.</span>
           </div>
           <p>
@@ -46,7 +46,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-mark">
-        <Flower size={100} fallDistance={130} />
+        <Flower size={100} floorSelector=".footer-bottom" floorEdge="top" />
       </div>
 
       <div className="footer-bottom">

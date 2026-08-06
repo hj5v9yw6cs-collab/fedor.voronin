@@ -1,14 +1,15 @@
 import { useEffect, useRef } from "react";
 import "./ButtonBurst.css";
 
-const LINE_COUNT = 10;
+const LINE_COUNT = 6;
 
 /**
  * Mounted once near the app root. Listens for clicks on anything
- * carrying the `btn-burst` class and fires a little burst of thin
- * lines radiating outward from it — a puff of "wind" on click. Uses
- * plain DOM nodes instead of React state since these are pure
- * fire-and-forget visuals with nothing to keep in sync.
+ * carrying the `btn-burst` class and fires a small, minimal burst of
+ * thin lines outward from the exact click point — not the button's
+ * center — like a puff of wind under the cursor. Uses plain DOM nodes
+ * instead of React state since these are pure fire-and-forget visuals
+ * with nothing to keep in sync.
  */
 export default function ButtonBurst() {
   const layerRef = useRef(null);
@@ -18,29 +19,25 @@ export default function ButtonBurst() {
       const target = e.target.closest(".btn-burst");
       if (!target) return;
 
-      const rect = target.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-
       const layer = layerRef.current;
       if (!layer) return;
 
       const group = document.createElement("span");
       group.className = "burst-group";
-      group.style.left = `${cx}px`;
-      group.style.top = `${cy}px`;
+      group.style.left = `${e.clientX}px`;
+      group.style.top = `${e.clientY}px`;
 
       for (let i = 0; i < LINE_COUNT; i++) {
         const line = document.createElement("span");
         line.className = "burst-line";
-        const angle = (360 / LINE_COUNT) * i + (Math.random() * 14 - 7);
+        const angle = (360 / LINE_COUNT) * i + (Math.random() * 10 - 5);
         line.style.setProperty("--burst-angle", `${angle}deg`);
-        line.style.setProperty("--burst-dist", `${32 + Math.random() * 20}px`);
+        line.style.setProperty("--burst-dist", `${16 + Math.random() * 10}px`);
         group.appendChild(line);
       }
 
       layer.appendChild(group);
-      setTimeout(() => group.remove(), 650);
+      setTimeout(() => group.remove(), 450);
     };
 
     document.addEventListener("click", onClick);
