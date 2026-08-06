@@ -21,6 +21,7 @@ export default function ScrollIndicator() {
     const svgPath = path.current;
     const svgDot = dot.current;
     const svgText = text.current;
+    const el = root.current;
 
     const totalLength = svgPath.getTotalLength();
 
@@ -34,14 +35,24 @@ export default function ScrollIndicator() {
       x: -20,
     });
 
+    gsap.set(el, { opacity: 1 });
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: ".hero",
         start: "top top",
-        end: "bottom center",
+        endTrigger: "#story",
+        end: "bottom bottom",
         scrub: true,
       },
     });
+
+    // Fades out only in the final stretch, right as the story section ends.
+    tl.to(el, {
+      opacity: 0,
+      ease: "none",
+      duration: 0.04,
+    }, 0.96);
 
     tl.to(svgPath, {
       strokeDashoffset: 0,
@@ -56,7 +67,7 @@ export default function ScrollIndicator() {
           attr: {
             cx: point.x,
             cy: point.y,
-            r: progress > 0.55 && progress < 0.75 ? 6.5 : 5,
+            r: progress > 0.9 ? 6.5 : 5,
           },
         });
       },
@@ -66,8 +77,8 @@ export default function ScrollIndicator() {
       opacity: 1,
       x: 0,
       ease: "none",
-      duration: 0.25,
-    }, 0.75);
+      duration: 0.15,
+    }, 0.85);
 
   }, { scope: root });
 
@@ -86,18 +97,20 @@ export default function ScrollIndicator() {
     >
 
       <svg
-        width="260"
-        height="240"
-        viewBox="0 0 260 240"
+        width="100%"
+        height="100%"
+        viewBox="0 0 150 720"
+        preserveAspectRatio="none"
       >
 
         <path
           ref={path}
           className="indicator-path"
           d="
-            M120 10
-            L120 150
-            C120 182 144 205 172 205
+            M40 0
+            L40 300
+            Q40 340 80 340
+            L80 680
           "
           fill="none"
         />
@@ -105,16 +118,16 @@ export default function ScrollIndicator() {
         <circle
           ref={dot}
           className="indicator-dot"
-          cx="120"
-          cy="10"
+          cx="40"
+          cy="0"
           r="5"
         />
 
         <text
           ref={text}
           className="indicator-text"
-          x="185"
-          y="210"
+          x="94"
+          y="684"
         >
           Моя история
         </text>

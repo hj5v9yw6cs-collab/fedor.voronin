@@ -1,11 +1,16 @@
 .indicator {
-  margin-top: 80px;
+  position: fixed;
+  z-index: 40;
+
+  left: 28px;
+  top: 130px;
+  bottom: 60px;
+
+  width: 150px;
 
   display: flex;
   justify-content: center;
   align-items: center;
-
-  width: 260px;
 
   background: none;
   border: none;
@@ -52,5 +57,13 @@
   letter-spacing: .02em;
 
   user-select: none;
+
+}
+
+@media (max-width: 900px) {
+
+  .indicator {
+    display: none;
+  }
 
 }
