@@ -40,13 +40,18 @@ export default function Footer() {
           <span className="footer-heading">{t.navHeading}</span>
           <a href="#story" onClick={(e) => scrollTo(e, "#story")}>{strings.nav.story}</a>
           <a href="#test" onClick={(e) => scrollTo(e, "#test")}>{strings.nav.test}</a>
-          <a href="#reviews" onClick={(e) => scrollTo(e, "#reviews")}>{strings.nav.reviews}</a>
         </div>
 
         <div className="footer-col">
           <span className="footer-heading">{t.contactHeading}</span>
           <a href="mailto:fedor1349666666@gmail.com">
             fedor1349666666@gmail.com
+          </a>
+          <a href="https://t.me/fedorrpomidorr" target="_blank" rel="noreferrer">
+            telegram
+          </a>
+          <a href="https://instagram.com/fedorpomidorr" target="_blank" rel="noreferrer">
+            instagram
           </a>
         </div>
 

@@ -5,7 +5,6 @@ export const DICT = {
     nav: {
       story: "история",
       test: "тест",
-      reviews: "отзывы",
       contacts: "контакты",
       cta: "пройти тест",
     },
@@ -78,7 +77,6 @@ export const DICT = {
     nav: {
       story: "story",
       test: "test",
-      reviews: "reviews",
       contacts: "contact",
       cta: "take the test",
     },
