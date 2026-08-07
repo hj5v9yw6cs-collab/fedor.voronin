@@ -1,13 +1,7 @@
 import "./Navbar.css";
 import Flower from "./Flower";
 import Ant from "./Ant";
-
-const LINKS = [
-  { href: "#story", label: "история" },
-  { href: "#test", label: "тест" },
-  { href: "#reviews", label: "отзывы" },
-  { href: "#footer", label: "контакты" },
-];
+import { useLanguage } from "../lib/i18nData";
 
 function scrollTo(e, href) {
   e.preventDefault();
@@ -15,6 +9,14 @@ function scrollTo(e, href) {
 }
 
 export default function Navbar() {
+  const { lang, setLang, strings } = useLanguage();
+  const links = [
+    { href: "#story", label: strings.nav.story },
+    { href: "#test", label: strings.nav.test },
+    { href: "#reviews", label: strings.nav.reviews },
+    { href: "#footer", label: strings.nav.contacts },
+  ];
+
   return (
     <header className="navbar">
       <div className="navbar-inner">
@@ -27,20 +29,38 @@ export default function Navbar() {
         </a>
 
         <nav className="navbar-nav">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <a key={l.href} href={l.href} onClick={(e) => scrollTo(e, l.href)}>
               {l.label}
             </a>
           ))}
         </nav>
 
-        <a
-          href="#test"
-          className="navbar-cta btn-burst"
-          onClick={(e) => scrollTo(e, "#test")}
-        >
-          пройти тест
-        </a>
+        <div className="navbar-right">
+          <div className="navbar-lang">
+            <button
+              className={`btn-burst${lang === "ru" ? " is-active" : ""}`}
+              onClick={() => setLang("ru")}
+            >
+              RU
+            </button>
+            <span>/</span>
+            <button
+              className={`btn-burst${lang === "en" ? " is-active" : ""}`}
+              onClick={() => setLang("en")}
+            >
+              EN
+            </button>
+          </div>
+
+          <a
+            href="#test"
+            className="navbar-cta btn-burst"
+            onClick={(e) => scrollTo(e, "#test")}
+          >
+            {strings.nav.cta}
+          </a>
+        </div>
       </div>
       <Ant edge="bottom" duration="26s" delay="1s" size={16} />
     </header>

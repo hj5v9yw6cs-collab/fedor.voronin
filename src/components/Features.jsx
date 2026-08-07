@@ -1,14 +1,11 @@
 import "./Features.css";
 import Ant from "./Ant";
-
-const LEVELS = [
-  { code: "A1–A2", label: "Начальный", desc: "Базовые фразы, простые диалоги." },
-  { code: "B1", label: "Средний", desc: "Свободно на бытовые темы." },
-  { code: "B2", label: "Выше среднего", desc: "Работа, учёба, сложные тексты." },
-  { code: "C1+", label: "Продвинутый", desc: "Свободное владение, нюансы." },
-];
+import { useLanguage } from "../lib/i18nData";
 
 export default function Features() {
+  const { strings } = useLanguage();
+  const levels = strings.features.levels;
+
   return (
     <section className="features">
 
@@ -16,16 +13,19 @@ export default function Features() {
 
       <div className="features-container">
 
-        <span className="features-label">уровни</span>
+        <span className="features-label">{strings.features.label}</span>
 
         <h2 className="features-title">
-          От «hello»
-          <br />
-          до свободной речи.
+          {strings.features.title.map((line, i) => (
+            <span key={i}>
+              {line}
+              {i < strings.features.title.length - 1 && <br />}
+            </span>
+          ))}
         </h2>
 
         <div className="features-grid">
-          {LEVELS.map((l, i) => (
+          {levels.map((l, i) => (
             <div className="features-item" key={l.code}>
               <span className="features-num">0{i + 1}</span>
               <span className="features-code">{l.code}</span>

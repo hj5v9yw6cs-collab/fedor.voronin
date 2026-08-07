@@ -1,16 +1,11 @@
 import "./Story.css";
 import Ant from "./Ant";
 import { useTypedBlocks } from "../lib/useTypedBlocks";
-
-const BLOCKS = [
-  "Всё началось\nс желания\nпознакомиться.",
-  "Мне было около пяти лет. Мы с мамой были в путешествии. На площади играли дети, и мне очень хотелось подойти к ним.",
-  "Но оказалось, что мы говорим на разных языках.",
-  "Тогда я впервые понял, что язык — это возможность знакомиться с людьми.",
-];
+import { useLanguage } from "../lib/i18nData";
 
 export default function Story() {
-  const { output, rootRef, activeIndex } = useTypedBlocks(BLOCKS);
+  const { strings } = useLanguage();
+  const { output, rootRef, activeIndex } = useTypedBlocks(strings.story.blocks);
 
   const cursor = (i) =>
     activeIndex === i ? <span className="story-cursor" /> : null;
@@ -25,7 +20,7 @@ export default function Story() {
         <div className="story-content">
 
           <span className="story-label">
-            МОЯ ИСТОРИЯ
+            {strings.story.label}
           </span>
 
           <h2>

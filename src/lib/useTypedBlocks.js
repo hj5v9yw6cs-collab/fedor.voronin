@@ -6,21 +6,26 @@ import { useEffect, useRef, useState } from "react";
  * isn't constant — it pauses a bit longer after punctuation, and
  * occasionally stalls for a moment mid-word, like someone actually
  * composing the thought rather than a flat-speed typewriter.
+ *
+ * If `blocks` itself changes later (e.g. the site's language switches)
+ * after it's already been shown once, it retypes from scratch with the
+ * new text instead of just swapping it in instantly.
  */
 export function useTypedBlocks(blocks) {
   const [output, setOutput] = useState(() => blocks.map(() => ""));
   const [activeIndex, setActiveIndex] = useState(-1);
   const rootRef = useRef(null);
-  const startedRef = useRef(false);
+  const visibleRef = useRef(false);
+  const prevBlocksRef = useRef(blocks);
 
   useEffect(() => {
     const el = rootRef.current;
-    if (!el || startedRef.current) return;
+    if (!el) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          startedRef.current = true;
+        if (entries[0].isIntersecting && !visibleRef.current) {
+          visibleRef.current = true;
           observer.disconnect();
           setActiveIndex(0);
         }
@@ -30,6 +35,14 @@ export function useTypedBlocks(blocks) {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (blocks === prevBlocksRef.current) return;
+    prevBlocksRef.current = blocks;
+    if (!visibleRef.current) return;
+    setOutput(blocks.map(() => ""));
+    setActiveIndex(0);
+  }, [blocks]);
 
   useEffect(() => {
     if (activeIndex < 0 || activeIndex >= blocks.length) return;

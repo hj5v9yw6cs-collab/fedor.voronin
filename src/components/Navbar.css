@@ -63,6 +63,37 @@
   color: var(--fg);
 }
 
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.navbar-lang {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-lang button {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: none;
+  border: none;
+  color: var(--fg-dim);
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.navbar-lang .is-active {
+  color: var(--fg);
+  border-bottom: 1px solid var(--fg);
+}
+
+.navbar-lang span {
+  color: var(--fg-dim);
+}
+
 .navbar-cta {
   display: none;
 
@@ -90,6 +121,12 @@
 
   .navbar-cta {
     display: inline-flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-right {
+    gap: 10px;
   }
 }
 

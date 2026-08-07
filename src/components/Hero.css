@@ -98,11 +98,6 @@
   align-items: center;
 }
 
-.hero-flower {
-  margin-bottom: -18px;
-  z-index: 2;
-}
-
 @media (max-width: 1100px) {
   .hero-container {
     grid-template-columns: 1fr;

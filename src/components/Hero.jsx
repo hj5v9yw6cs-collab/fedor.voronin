@@ -1,9 +1,11 @@
 import "./Hero.css";
 import StickerPhoto from "./StickerPhoto";
 import ScrollIndicator from "./ScrollIndicator";
-import Flower from "./Flower";
+import { useLanguage } from "../lib/i18nData";
 
 export default function Hero() {
+  const { strings } = useLanguage();
+
   const scrollTo = (id) => (e) => {
     e.preventDefault();
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -16,34 +18,33 @@ export default function Hero() {
         <div className="hero-left">
 
           <span className="hero-label">
-            английский с федором
+            {strings.hero.label}
           </span>
 
           <h1 className="hero-title">
-            Узнайте
-            <br />
-            свой уровень
-            <br />
-            английского.
+            {strings.hero.title.map((line, i) => (
+              <span key={i}>
+                {line}
+                {i < strings.hero.title.length - 1 && <br />}
+              </span>
+            ))}
           </h1>
 
           <p className="hero-description">
-            Бесплатный интерактивный тест,
-            который определит ваш уровень
-            и покажет, что делать дальше.
+            {strings.hero.description}
           </p>
 
           <div className="hero-buttons">
 
             <button className="primary-btn btn-burst" onClick={scrollTo("test")}>
-              Пройти тест
+              {strings.hero.primaryBtn}
             </button>
 
             <button
               className="secondary-btn btn-burst"
               onClick={scrollTo("story")}
             >
-              Моя история
+              {strings.hero.secondaryBtn}
             </button>
 
           </div>
@@ -53,12 +54,6 @@ export default function Hero() {
         </div>
 
         <div className="hero-right">
-          <Flower
-            size={72}
-            floorSelector=".photo-card"
-            floorEdge="top"
-            className="hero-flower"
-          />
           <StickerPhoto />
         </div>
 

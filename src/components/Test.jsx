@@ -3,11 +3,12 @@ import "./Test.css";
 import { QUESTIONS, getLevel } from "../lib/testQuestions";
 import { sendTestResults } from "../lib/sendResults";
 import { speak, canSpeak } from "../lib/speak";
+import { useLanguage } from "../lib/i18nData";
 import Ant from "./Ant";
 
 const EMPTY_ANSWERS = Array(QUESTIONS.length).fill(null);
 
-function ListenBlock({ text }) {
+function ListenBlock({ text, listenLabel, listenAgainLabel }) {
   const [played, setPlayed] = useState(false);
 
   if (!canSpeak) {
@@ -26,12 +27,15 @@ function ListenBlock({ text }) {
       }}
     >
       <span className="test-listen-icon">{played ? "↻" : "▶"}</span>
-      {played ? "прослушать ещё раз" : "прослушать"}
+      {played ? listenAgainLabel : listenLabel}
     </button>
   );
 }
 
 export default function Test() {
+  const { strings } = useLanguage();
+  const t = strings.test;
+
   const [step, setStep] = useState("intro"); // intro | quiz | contact | sending | done
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState(EMPTY_ANSWERS);
@@ -96,22 +100,21 @@ export default function Test() {
 
       <div className="test-container">
 
-        <span className="test-label">тест</span>
+        <span className="test-label">{t.label}</span>
 
         {step === "intro" && (
           <div className="test-intro">
             <h2>
-              Узнайте свой
-              <br />
-              уровень за 5 минут.
+              {t.introTitle.map((line, i) => (
+                <span key={i}>
+                  {line}
+                  {i < t.introTitle.length - 1 && <br />}
+                </span>
+              ))}
             </h2>
-            <p>
-              {QUESTIONS.length} коротких заданий: грамматика, лексика,
-              текст на понимание прочитанного и аудирование. В конце —
-              ваш уровень по шкале CEFR и рекомендация, с чего начать.
-            </p>
+            <p>{t.introDescription(QUESTIONS.length)}</p>
             <button className="test-btn btn-burst" onClick={() => setStep("quiz")}>
-              начать тест
+              {t.startBtn}
             </button>
           </div>
         )}
@@ -130,15 +133,19 @@ export default function Test() {
 
             {q.type === "reading" && (
               <div className="test-passage">
-                <span className="test-kind">текст</span>
+                <span className="test-kind">{t.kindReading}</span>
                 <p>{q.passage}</p>
               </div>
             )}
 
             {q.type === "listening" && (
               <div className="test-passage">
-                <span className="test-kind">аудирование</span>
-                <ListenBlock text={q.audioText} />
+                <span className="test-kind">{t.kindListening}</span>
+                <ListenBlock
+                  text={q.audioText}
+                  listenLabel={t.listen}
+                  listenAgainLabel={t.listenAgain}
+                />
               </div>
             )}
 
@@ -156,47 +163,47 @@ export default function Test() {
 
         {step === "contact" && (
           <form className="test-contact" onSubmit={submit}>
-            <h2>Почти готово.</h2>
-            <p>Куда прислать результат?</p>
+            <h2>{t.contactTitle}</h2>
+            <p>{t.contactSubtitle}</p>
 
             <input
               type="text"
-              placeholder="имя (необязательно)"
+              placeholder={t.namePlaceholder}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
 
             <input
               type="text"
-              placeholder="email или telegram"
+              placeholder={t.contactPlaceholder}
               required
               value={contact}
               onChange={(e) => setContact(e.target.value)}
             />
 
             <button type="submit" className="test-btn btn-burst">
-              получить результат
+              {t.submitBtn}
             </button>
           </form>
         )}
 
         {step === "sending" && (
           <div className="test-intro">
-            <h2>Считаем результат…</h2>
+            <h2>{t.sending}</h2>
           </div>
         )}
 
         {step === "done" && result && (
           <div className="test-result">
             <span className="test-result-code">{result.level.code}</span>
-            <h2>{result.level.label}</h2>
+            <h2>{t.levels[result.level.code]}</h2>
             <p>
-              Правильных ответов: {result.score} из {QUESTIONS.length}.
+              {t.resultCorrect(result.score, QUESTIONS.length)}
               <br />
-              Результат также отправлен на почту — скоро свяжусь с вами.
+              {t.resultNote}
             </p>
             <button className="test-btn btn-burst" onClick={reset}>
-              пройти ещё раз
+              {t.retryBtn}
             </button>
           </div>
         )}

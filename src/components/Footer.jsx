@@ -1,6 +1,7 @@
 import "./Footer.css";
 import Flower from "./Flower";
 import Ant from "./Ant";
+import { useLanguage } from "../lib/i18nData";
 
 const YEAR = new Date().getFullYear();
 
@@ -10,6 +11,9 @@ function scrollTo(e, href) {
 }
 
 export default function Footer() {
+  const { lang, setLang, strings } = useLanguage();
+  const t = strings.footer;
+
   return (
     <footer id="footer" className="site-footer">
 
@@ -19,25 +23,28 @@ export default function Footer() {
 
         <div className="footer-brand">
           <div className="footer-brand-row">
-            <Flower size={26} floorSelector=".footer-brand" floorEdge="bottom" />
-            <span>Fedor.</span>
+            <Flower size={26} static />
+            <span>{t.brandName}</span>
           </div>
           <p>
-            Помогаю говорить по-английски
-            свободно — с нуля и до
-            продвинутого уровня.
+            {t.tagline.split("\n").map((line, i) => (
+              <span key={i}>
+                {line}
+                {i < t.tagline.split("\n").length - 1 && <br />}
+              </span>
+            ))}
           </p>
         </div>
 
         <div className="footer-col">
-          <span className="footer-heading">навигация</span>
-          <a href="#story" onClick={(e) => scrollTo(e, "#story")}>история</a>
-          <a href="#test" onClick={(e) => scrollTo(e, "#test")}>тест</a>
-          <a href="#reviews" onClick={(e) => scrollTo(e, "#reviews")}>отзывы</a>
+          <span className="footer-heading">{t.navHeading}</span>
+          <a href="#story" onClick={(e) => scrollTo(e, "#story")}>{strings.nav.story}</a>
+          <a href="#test" onClick={(e) => scrollTo(e, "#test")}>{strings.nav.test}</a>
+          <a href="#reviews" onClick={(e) => scrollTo(e, "#reviews")}>{strings.nav.reviews}</a>
         </div>
 
         <div className="footer-col">
-          <span className="footer-heading">связаться</span>
+          <span className="footer-heading">{t.contactHeading}</span>
           <a href="mailto:fedor1349666666@gmail.com">
             fedor1349666666@gmail.com
           </a>
@@ -50,12 +57,22 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span>© {YEAR} Fedor. English Studio</span>
+        <span>{t.copyright(YEAR)}</span>
 
         <div className="footer-lang">
-          <button className="is-active btn-burst">RU</button>
+          <button
+            className={`btn-burst${lang === "ru" ? " is-active" : ""}`}
+            onClick={() => setLang("ru")}
+          >
+            RU
+          </button>
           <span>/</span>
-          <button className="btn-burst">EN</button>
+          <button
+            className={`btn-burst${lang === "en" ? " is-active" : ""}`}
+            onClick={() => setLang("en")}
+          >
+            EN
+          </button>
         </div>
       </div>
     </footer>

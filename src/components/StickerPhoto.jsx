@@ -1,7 +1,10 @@
 import "./StickerPhoto.css";
 import photo from "../assets/me.png";
+import { useLanguage } from "../lib/i18nData";
 
 export default function StickerPhoto() {
+  const { strings } = useLanguage();
+
   return (
     <div className="sticker">
 
@@ -31,11 +34,12 @@ export default function StickerPhoto() {
         </svg>
 
         <p>
-          Язык объединяет
-          <br />
-          людей и открывает
-          <br />
-          весь мир.
+          {strings.hero.photoNote.map((line, i) => (
+            <span key={i}>
+              {line}
+              {i < strings.hero.photoNote.length - 1 && <br />}
+            </span>
+          ))}
         </p>
 
       </div>

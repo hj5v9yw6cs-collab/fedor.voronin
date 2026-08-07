@@ -25,18 +25,16 @@ const GRAVITY = 2600; // px/s²
 
 /**
  * Drops one shed petal with actual gravity — accelerates downward,
- * drifts a little sideways, tumbles as it falls. It settles on the
- * first real surface it reaches: either the flower's measured floor
- * (floorSelector/floorEdge), or — if it comes down where an earlier
- * petal already landed — the top of that petal instead, the same way
- * it would land on solid ground; either way it stops there for good
- * and doesn't sink through. `landedRef` is the shared list of what's
- * already down, so the pile builds up naturally rather than every
- * petal falling straight to the ground through each other.
+ * drifts a little sideways, tumbles as it falls — until it reaches the
+ * flower's real, measured floor (floorSelector/floorEdge), where it
+ * settles for good. Petals are light and flat: they don't stack or
+ * balance on top of one another (nothing here holds another petal up),
+ * they all come to rest on the same actual surface, just with a small
+ * random landing height so a few of them visibly overlap at a natural
+ * angle instead of lining up in a perfectly flat row.
  */
-function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, floorPadding, landedRef }) {
+function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, floorPadding }) {
   const flowerRect = container.getBoundingClientRect();
-  const startX = (attach.x / 100) * flowerRect.width;
   const startY = (attach.y / 100) * flowerRect.height;
 
   const floorEl = floorSelector ? document.querySelector(floorSelector) : null;
@@ -46,11 +44,14 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
         : floorEl.getBoundingClientRect().top) - floorPadding
     : flowerRect.top + startY + 90;
 
-  // Ground floor, expressed relative to this petal's own start point.
-  const groundFloor = Math.max(14, floorY - flowerRect.top) - startY;
-
   const petalW = size * 0.13; // short axis — its thickness once lying flat
   const petalH = size * 0.3; // long axis — its footprint once lying flat
+
+  // Ground floor, relative to this petal's own start point, with a
+  // small random settle so petals landing near each other don't all
+  // sit at the exact same height (a thin petal resting half-over
+  // another only raises by a few px, not by a whole petal's height).
+  const floor = Math.max(14, floorY - flowerRect.top) - startY + Math.random() * petalW * 0.7;
 
   const el = document.createElement("span");
   el.className = "flower-petal-fallen";
@@ -62,17 +63,8 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
 
   const settleRot = (Math.random() < 0.5 ? 1 : -1) * (80 + Math.random() * 20);
 
-  const land = (x, floor) => {
-    landedRef.current.push({
-      cx: startX + x,
-      topY: startY + floor - petalW / 2,
-      halfSpan: petalH / 2,
-    });
-  };
-
   if (REDUCED_MOTION) {
-    el.style.transform = `translate(-50%, -50%) translate(0, ${groundFloor}px) rotate(${settleRot}deg)`;
-    land(0, groundFloor);
+    el.style.transform = `translate(-50%, -50%) translate(0, ${floor}px) rotate(${settleRot}deg)`;
     return;
   }
 
@@ -82,17 +74,6 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
   let vy = -30 - Math.random() * 50;
   let rot = 0;
   let last = performance.now();
-
-  const currentFloor = () => {
-    let floor = groundFloor;
-    for (const p of landedRef.current) {
-      if (Math.abs(startX + x - p.cx) < p.halfSpan + petalH / 2) {
-        const local = p.topY - startY;
-        if (local < floor) floor = local;
-      }
-    }
-    return floor;
-  };
 
   function frame(now) {
     const dt = Math.min((now - last) / 1000, 0.032);
@@ -104,11 +85,9 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
     vx *= Math.max(0, 1 - 3 * dt);
     rot += vx * dt * 3.5;
 
-    const floor = currentFloor();
     if (y >= floor) {
       el.style.transition = "transform .16s ease-out";
       el.style.transform = `translate(-50%, -50%) translate(${x}px, ${floor}px) rotate(${settleRot}deg)`;
-      land(x, floor);
       return;
     }
 
@@ -123,28 +102,29 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
  * The site's brand mark — a daisy. It starts whole; once it scrolls
  * into view, its petals tear off one at a time (the mark itself has
  * fewer and fewer petals) and fall — real gravity, not a canned
- * animation — onto a specific surface below it (`floorSelector`), or
- * onto each other once the pile builds up, and stay there for good.
- * Once every petal is gone, only the center (and its little stem) is
- * left.
+ * animation — onto a specific surface below it, where they stay for
+ * good. Once every petal is gone, only the center (and its little
+ * stem) is left.
  *
  * `floorSelector` is a CSS selector for the element whose edge acts as
- * the ground; `floorEdge` picks which edge ("top" or "bottom").
+ * the ground; `floorEdge` picks which edge ("top" or "bottom"). Pass
+ * `static` to keep the flower whole and skip the shedding entirely.
  */
 export default function Flower({
   size = 96,
   floorSelector,
   floorEdge = "top",
   floorPadding = 0,
+  static: isStatic = false,
   className = "",
 }) {
   const [shed, setShed] = useState(0);
   const rootRef = useRef(null);
   const layerRef = useRef(null);
   const startedRef = useRef(false);
-  const landedRef = useRef([]);
 
   useEffect(() => {
+    if (isStatic) return;
     const el = rootRef.current;
     if (!el || startedRef.current) return;
 
@@ -163,7 +143,6 @@ export default function Flower({
               floorSelector,
               floorEdge,
               floorPadding,
-              landedRef,
             });
           }
         }, i * step + 250);
@@ -210,7 +189,7 @@ export default function Flower({
         <rect x="47" y="80" width="6" height="18" rx="3" fill="currentColor" />
       </svg>
 
-      <div ref={layerRef} className="flower-fallen" />
+      {!isStatic && <div ref={layerRef} className="flower-fallen" />}
     </div>
   );
 }
