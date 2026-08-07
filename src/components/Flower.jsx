@@ -56,7 +56,7 @@ function blowPetal({ layer, container, attach, size, wind }) {
   let y = 0;
   let rot = 0;
   let vx = wind * (0.5 + Math.random() * 0.3);
-  let vy = -40 - Math.random() * 30;
+  let vy = (Math.random() - 0.5) * 12;
   let last = performance.now();
   const offRight = window.innerWidth - (flowerRect.left + startX) + 60;
 
@@ -64,7 +64,7 @@ function blowPetal({ layer, container, attach, size, wind }) {
     const dt = Math.min((now - last) / 1000, 0.032);
     last = now;
 
-    vy += GRAVITY * 0.3 * dt; // a gentle fall while the gust carries it
+    vy += GRAVITY * 0.025 * dt; // barely any sag — this is a near-flat gust, not a fall
     y += vy * dt;
     vx += wind * dt;
     x += vx * dt;
