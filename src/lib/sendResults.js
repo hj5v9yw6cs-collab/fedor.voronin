@@ -2,14 +2,14 @@ import { QUESTIONS } from "./testQuestions";
 
 const OWNER_EMAIL = "fedor1349666666@gmail.com";
 
-function buildMessage({ name, contact, score, total, level }) {
+function buildMessage({ name, contact, score, total, level, answers }) {
   const lines = [
     `Имя: ${name || "не указано"}`,
     `Контакт: ${contact || "не указан"}`,
     `Результат: ${score}/${total} — уровень ${level.code} (${level.label})`,
     "",
     "Ответы:",
-    ...QUESTIONS.map((item, i) => {
+    ...answers.map((item, i) => {
       const context = item.passage ?? item.audioText;
       const contextLine = context ? ` [${item.type}: "${context}"]` : "";
       const mark = item.picked === item.options[item.correct] ? "верно" : "неверно";
