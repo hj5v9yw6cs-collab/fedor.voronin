@@ -1,0 +1,137 @@
+.ant-walker {
+  position: absolute;
+  left: -24px;
+  z-index: 3;
+
+  color: var(--fg-dim);
+  pointer-events: none;
+
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-duration: var(--ant-duration, 24s);
+  animation-delay: var(--ant-delay, 0s);
+}
+
+.ant-top {
+  top: 0;
+  animation-name: ant-walk-top;
+}
+
+.ant-bottom {
+  bottom: 0;
+  animation-name: ant-walk-bottom;
+}
+
+/* Whole-body bob, on top of the walking translation/flip above, synced
+   to the leg cadence for a bit of a scuttle. */
+.ant-body-bob {
+  animation: ant-bob 0.28s ease-in-out infinite;
+}
+
+/* Alternating tripod gait: legs a (front-left, back-left, mid-right)
+   swing one way while legs b (mid-left, front-right, back-right) swing
+   the other, then they switch — like a real 6-legged walk. */
+.ant-leg {
+  animation-duration: 0.28s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.ant-leg-a {
+  animation-name: leg-swing-a;
+}
+
+.ant-leg-b {
+  animation-name: leg-swing-b;
+}
+
+@keyframes leg-swing-a {
+  0%, 100% {
+    transform: rotate(-9deg);
+  }
+  50% {
+    transform: rotate(9deg);
+  }
+}
+
+@keyframes leg-swing-b {
+  0%, 100% {
+    transform: rotate(9deg);
+  }
+  50% {
+    transform: rotate(-9deg);
+  }
+}
+
+@keyframes ant-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.7px);
+  }
+}
+
+@keyframes ant-walk-top {
+  0% {
+    left: -24px;
+    transform: translateY(-50%) scaleX(1);
+  }
+  49% {
+    left: calc(100% + 24px);
+    transform: translateY(-50%) scaleX(1);
+  }
+  50% {
+    left: calc(100% + 24px);
+    transform: translateY(-50%) scaleX(-1);
+  }
+  99% {
+    left: -24px;
+    transform: translateY(-50%) scaleX(-1);
+  }
+  100% {
+    left: -24px;
+    transform: translateY(-50%) scaleX(1);
+  }
+}
+
+@keyframes ant-walk-bottom {
+  0% {
+    left: -24px;
+    transform: translateY(50%) scaleX(1);
+  }
+  49% {
+    left: calc(100% + 24px);
+    transform: translateY(50%) scaleX(1);
+  }
+  50% {
+    left: calc(100% + 24px);
+    transform: translateY(50%) scaleX(-1);
+  }
+  99% {
+    left: -24px;
+    transform: translateY(50%) scaleX(-1);
+  }
+  100% {
+    left: -24px;
+    transform: translateY(50%) scaleX(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .ant-walker {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ant-walker {
+    animation: none;
+    left: 40%;
+    transform: translateY(-50%);
+  }
+  .ant-leg,
+  .ant-body-bob {
+    animation: none;
+  }
+}

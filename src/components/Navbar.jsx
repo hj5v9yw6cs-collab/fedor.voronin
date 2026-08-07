@@ -1,40 +1,67 @@
+import "./Navbar.css";
+import Flower from "./Flower";
+import Bunting from "./Bunting";
+import { useLanguage } from "../lib/i18nData";
+
+function scrollTo(e, href) {
+  e.preventDefault();
+  document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+}
+
 export default function Navbar() {
+  const { lang, setLang, strings } = useLanguage();
+  const links = [
+    { href: "#story", label: strings.nav.story },
+    { href: "#test", label: strings.nav.test },
+    { href: "#footer", label: strings.nav.contacts },
+  ];
+
   return (
-    <header className="fixed left-0 top-0 z-50 w-full">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-7">
+    <header className="navbar">
+      <Bunting />
+      <div className="navbar-inner">
+        <a href="#" className="navbar-brand" onClick={(e) => scrollTo(e, "body")}>
+          <Flower size={30} floorSelector=".navbar" floorEdge="bottom" wind={420} />
+          <div className="navbar-brand-text">
+            <span className="navbar-name">Fedor.</span>
+            <span className="navbar-tag">english studio</span>
+          </div>
+        </a>
 
-        <div>
-          <h2 className="text-xl font-medium tracking-tight">
-            Fedor.
-          </h2>
-
-          <p className="text-xs text-gray-500">
-            English Studio
-          </p>
-        </div>
-
-        <nav className="hidden gap-10 text-sm text-gray-300 md:flex">
-          <a href="#">История</a>
-          <a href="#">Тест</a>
-          <a href="#">Отзывы</a>
-          <a href="#">Контакты</a>
+        <nav className="navbar-nav">
+          {links.map((l) => (
+            <a key={l.href} href={l.href} onClick={(e) => scrollTo(e, l.href)}>
+              {l.label}
+            </a>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-xl">
+        <div className="navbar-right">
+          <div className="navbar-lang">
+            <button
+              className={`btn-burst${lang === "ru" ? " is-active" : ""}`}
+              onClick={() => setLang("ru")}
+            >
+              RU
+            </button>
+            <span>/</span>
+            <button
+              className={`btn-burst${lang === "en" ? " is-active" : ""}`}
+              onClick={() => setLang("en")}
+            >
+              EN
+            </button>
+          </div>
 
-          <button className="rounded-full bg-white px-4 py-2 text-sm text-black">
-            RU
-          </button>
-
-          <button className="px-4 py-2 text-sm text-gray-400">
-            EN
-          </button>
-
+          <a
+            href="#test"
+            className="navbar-cta btn-burst"
+            onClick={(e) => scrollTo(e, "#test")}
+          >
+            {strings.nav.cta}
+          </a>
         </div>
-
       </div>
-
-      <div className="h-px bg-white/10"></div>
     </header>
   );
 }

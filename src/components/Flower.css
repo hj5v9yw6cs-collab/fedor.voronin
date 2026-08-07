@@ -1,0 +1,35 @@
+.flower {
+  position: relative;
+  color: var(--fg);
+  flex-shrink: 0;
+}
+
+.flower-mark {
+  position: relative;
+  z-index: 2;
+  display: block;
+}
+
+.flower-fallen {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Falling petals are plain DOM nodes managed imperatively by the
+   gravity simulation in Flower.jsx (see dropPetal) — their transform
+   is set frame-by-frame in JS, not via a CSS keyframe, since each one
+   needs to stop exactly where its measured floor is. */
+.flower-petal-fallen {
+  position: absolute;
+  transform: translate(-50%, -50%);
+
+  background: var(--fg);
+  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+}
+
+.flower-petal-fallen:nth-child(3n) {
+  background: color-mix(in srgb, var(--fg) 80%, var(--accent) 20%);
+}

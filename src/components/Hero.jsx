@@ -1,12 +1,13 @@
 import "./Hero.css";
 import StickerPhoto from "./StickerPhoto";
-import ScrollIndicator from "./ScrollIndicator";
+import { useLanguage } from "../lib/i18nData";
 
 export default function Hero() {
-  const scrollToStory = () => {
-    document.getElementById("story")?.scrollIntoView({
-      behavior: "smooth",
-    });
+  const { strings } = useLanguage();
+
+  const scrollTo = (id) => (e) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -16,39 +17,36 @@ export default function Hero() {
         <div className="hero-left">
 
           <span className="hero-label">
-            ✦ АНГЛИЙСКИЙ С ФЕДОРОМ
+            {strings.hero.label}
           </span>
 
           <h1 className="hero-title">
-            Узнайте
-            <br />
-            свой уровень
-            <br />
-            английского.
+            {strings.hero.title.map((line, i) => (
+              <span key={i}>
+                {line}
+                {i < strings.hero.title.length - 1 && <br />}
+              </span>
+            ))}
           </h1>
 
           <p className="hero-description">
-            Бесплатный интерактивный тест,
-            который определит ваш уровень
-            и покажет, что делать дальше.
+            {strings.hero.description}
           </p>
 
           <div className="hero-buttons">
 
-            <button className="primary-btn">
-              Пройти тест
+            <button className="primary-btn btn-burst" onClick={scrollTo("test")}>
+              {strings.hero.primaryBtn}
             </button>
 
             <button
-              className="secondary-btn"
-              onClick={scrollToStory}
+              className="secondary-btn btn-burst"
+              onClick={scrollTo("story")}
             >
-              Моя история
+              {strings.hero.secondaryBtn}
             </button>
 
           </div>
-
-          <ScrollIndicator />
 
         </div>
 

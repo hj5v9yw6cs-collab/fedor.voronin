@@ -1,16 +1,95 @@
-# React + Vite
+# Fedor. — English Studio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Одностраничный сайт репетитора английского: история, шкала уровней,
+тест на определение уровня (с чтением и аудированием) и футер со
+связью. Дизайн-система (типографика, цвета, фирменная ромашка) построена
+по референсу masamadre.ru, адаптирована в тёмной палитре, с переводом
+интерфейса на RU/EN.
 
-Currently, two official plugins are available:
+## Разработка
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+## Деплой на GitHub Pages — домен fedorvoronin.ru
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Сборка и выкладка настроены через `.github/workflows/deploy.yml` —
+срабатывает на каждый пуш в `main`. Домен указан в `public/CNAME`.
 
-## Expanding the ESLint configuration
+**Разово нужно сделать на GitHub:**
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **Settings → Pages → Source** → выбрать «GitHub Actions».
+2. Смёржить эту ветку в `main` (или запушить туда) — соберётся и
+   выложится сайт.
+3. Там же, в **Settings → Pages → Custom domain**, вписать
+   `fedorvoronin.ru` и сохранить. Через пару минут после того, как DNS
+   (следующий пункт) настроен и проверен, появится галочка и кнопка
+   «Enforce HTTPS» — включить её.
+
+**Разово нужно сделать в reg.ru**, в настройках DNS-зоны домена
+(«DNS-серверы и управление зоной» → добавить записи):
+
+| Тип | Хост | Значение |
+|---|---|---|
+| A | @ (или пусто) | `185.199.108.153` |
+| A | @ (или пусто) | `185.199.109.153` |
+| A | @ (или пусто) | `185.199.110.153` |
+| A | @ (или пусто) | `185.199.111.153` |
+| CNAME | www | `<владелец-репозитория>.github.io.` |
+
+(4 A-записи — на них резолвится сам `fedorvoronin.ru`; CNAME на `www`
+опционален, но пригодится, если кто-то наберёт `www.fedorvoronin.ru`.)
+
+DNS может применяться от нескольких минут до суток. Пока не применилось,
+сайт по служебному адресу `<владелец-репозитория>.github.io/fedor.voronin/`
+будет выглядеть сломанным (пути к файлам настроены под корень
+`fedorvoronin.ru`, а не под этот подпуть) — это ожидаемо, ждём DNS,
+после подключения домена всё встанет на место.
+
+## Тест и отправка результатов на почту
+
+Тест в разделе «Тест» (`src/components/Test.jsx`) в конце отправляет
+имя, контакт (telegram/instagram) и результат на
+`fedor1349666666@gmail.com` через [FormSubmit](https://formsubmit.co) —
+бесплатный сервис «форма → email», работающий без бэкенда, регистрации
+и API-ключей.
+
+**Важно:** это не работает через превью-ссылки (Claude Artifacts) — у
+них строгая политика безопасности, блокирующая любые запросы на
+внешние сайты. Проверять доставку почты можно только на реально
+задеплоенном сайте (см. «Деплой» выше).
+
+**Единственное, что нужно сделать после деплоя — один раз подтвердить
+адрес:**
+
+1. На сайте кто угодно проходит тест до конца и отправляет результат —
+   подойдёт и ваша собственная тестовая попытка.
+2. FormSubmit в ответ пришлёт на `fedor1349666666@gmail.com` письмо
+   с темой вроде «Confirm form submission on formsubmit.co» и кнопкой
+   «Activate Form» — нажмите её (проверьте и папку «Спам»/«Промоакции»).
+3. Готово: это письмо было единственным «служебным», сам результат
+   теста в нём не отправлялся. Начиная со следующей отправки все
+   результаты будут приходить на почту уже как обычные письма,
+   без всяких дополнительных подтверждений.
+
+Если запрос по какой-то причине не проходит (нет сети и т.п.), у
+посетителя откроется почтовый клиент с уже заполненным письмом на
+`fedor1349666666@gmail.com` — так результаты не теряются в любом
+случае.
+
+## Аудирование
+
+Сейчас задания на аудирование озвучиваются через браузерный синтез
+речи (`src/lib/speak.js`) — временное решение. Планируется заменить на
+настоящие аудиозаписи голоса Фёдора: как только будут готовы файлы,
+их нужно положить в `src/assets/` и подключить в
+`src/lib/testQuestions.js`/`src/components/Test.jsx` вместо вызова
+`speak()`.
+
+## Сборка
+
+```bash
+npm run build
+```
