@@ -23,6 +23,65 @@ const REDUCED_MOTION =
 
 const GRAVITY = 2600; // px/s²
 
+function makePetalEl(layer, attach, size) {
+  const petalW = size * 0.13; // short axis — its thickness once lying flat
+  const petalH = size * 0.3; // long axis — its footprint once lying flat
+  const el = document.createElement("span");
+  el.className = "flower-petal-fallen";
+  el.style.left = `${attach.x}%`;
+  el.style.top = `${attach.y}%`;
+  el.style.width = `${Math.round(petalW)}px`;
+  el.style.height = `${Math.round(petalH)}px`;
+  layer.appendChild(el);
+  return el;
+}
+
+/**
+ * A windy petal isn't landing anywhere — it gets caught and carried
+ * off to the right until it's blown straight past the edge of the
+ * screen and gone, the way a real light petal would just disappear
+ * down the street rather than politely resting nearby.
+ */
+function blowPetal({ layer, container, attach, size, wind }) {
+  const flowerRect = container.getBoundingClientRect();
+  const startX = (attach.x / 100) * flowerRect.width;
+  const el = makePetalEl(layer, attach, size);
+
+  if (REDUCED_MOTION) {
+    el.remove();
+    return;
+  }
+
+  let x = 0;
+  let y = 0;
+  let rot = 0;
+  let vx = wind * (0.5 + Math.random() * 0.3);
+  let vy = -40 - Math.random() * 30;
+  let last = performance.now();
+  const offRight = window.innerWidth - (flowerRect.left + startX) + 60;
+
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.032);
+    last = now;
+
+    vy += GRAVITY * 0.3 * dt; // a gentle fall while the gust carries it
+    y += vy * dt;
+    vx += wind * dt;
+    x += vx * dt;
+    rot += vx * dt * 2.2;
+
+    if (x > offRight) {
+      el.remove();
+      return;
+    }
+
+    el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rot}deg)`;
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
+
 /**
  * Drops one shed petal with actual gravity — accelerates downward,
  * drifts a little sideways, tumbles as it falls — until it reaches the
@@ -33,7 +92,7 @@ const GRAVITY = 2600; // px/s²
  * random landing height so a few of them visibly overlap at a natural
  * angle instead of lining up in a perfectly flat row.
  */
-function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, floorPadding, wind = 0 }) {
+function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, floorPadding }) {
   const flowerRect = container.getBoundingClientRect();
   const startY = (attach.y / 100) * flowerRect.height;
 
@@ -44,8 +103,7 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
         : floorEl.getBoundingClientRect().top) - floorPadding
     : flowerRect.top + startY + 90;
 
-  const petalW = size * 0.13; // short axis — its thickness once lying flat
-  const petalH = size * 0.3; // long axis — its footprint once lying flat
+  const petalW = size * 0.13;
 
   // Ground floor, relative to this petal's own start point, with a
   // small random settle so petals landing near each other don't all
@@ -53,14 +111,7 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
   // another only raises by a few px, not by a whole petal's height).
   const floor = Math.max(14, floorY - flowerRect.top) - startY + Math.random() * petalW * 0.7;
 
-  const el = document.createElement("span");
-  el.className = "flower-petal-fallen";
-  el.style.left = `${attach.x}%`;
-  el.style.top = `${attach.y}%`;
-  el.style.width = `${Math.round(petalW)}px`;
-  el.style.height = `${Math.round(petalH)}px`;
-  layer.appendChild(el);
-
+  const el = makePetalEl(layer, attach, size);
   const settleRot = (Math.random() < 0.5 ? 1 : -1) * (80 + Math.random() * 20);
 
   if (REDUCED_MOTION) {
@@ -70,13 +121,8 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
 
   let x = 0;
   let y = 0;
-  // A gust needs airtime to actually carry something — the navbar's
-  // floor is only a few px below, too short for gravity to give wind
-  // much to work with, so a windy petal gets a bigger upward pop first
-  // (more hang time) and starts already moving with the gust, not
-  // building up to it gradually.
-  let vx = wind !== 0 ? wind * (0.7 + Math.random() * 0.5) : (Math.random() - 0.5) * 90;
-  let vy = wind !== 0 ? -110 - Math.random() * 60 : -30 - Math.random() * 50;
+  let vx = (Math.random() - 0.5) * 90;
+  let vy = -30 - Math.random() * 50;
   let rot = 0;
   let last = performance.now();
 
@@ -86,9 +132,8 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
 
     vy += GRAVITY * dt;
     y += vy * dt;
-    vx *= Math.max(0, 1 - (wind !== 0 ? 0.5 : 3) * dt);
-    vx += wind * dt;
     x += vx * dt;
+    vx *= Math.max(0, 1 - 3 * dt);
     rot += vx * dt * 3.5;
 
     if (y >= floor) {
@@ -107,9 +152,11 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
 /**
  * The site's brand mark — a daisy. It starts whole; once it scrolls
  * into view, its petals tear off one at a time (the mark itself has
- * fewer and fewer petals) and fall — real gravity, not a canned
- * animation — onto a specific surface below it, where they stay for
- * good. Once every petal is gone, only the center (and its little
+ * fewer and fewer petals). Normally each one falls — real gravity —
+ * onto a specific surface below it and stays there. Pass `wind`
+ * instead of `floorSelector` and a petal doesn't land at all: it gets
+ * carried off to the right and blown straight past the edge of the
+ * screen. Once every petal is gone, only the center (and its little
  * stem) is left.
  *
  * `floorSelector` is a CSS selector for the element whose edge acts as
@@ -141,7 +188,11 @@ export default function Flower({
       PETALS.forEach((p, i) => {
         setTimeout(() => {
           setShed((n) => Math.max(n, i + 1));
-          if (rootRef.current && layerRef.current) {
+          if (!rootRef.current || !layerRef.current) return;
+
+          if (wind !== 0) {
+            blowPetal({ layer: layerRef.current, container: rootRef.current, attach: p, size, wind });
+          } else {
             dropPetal({
               layer: layerRef.current,
               container: rootRef.current,
@@ -150,7 +201,6 @@ export default function Flower({
               floorSelector,
               floorEdge,
               floorPadding,
-              wind,
             });
           }
         }, i * step + 250);
