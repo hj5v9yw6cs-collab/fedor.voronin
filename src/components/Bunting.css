@@ -10,24 +10,24 @@
 }
 
 .bunting-flag {
-  animation: flag-sway 2.6s ease-in-out infinite;
+  animation: flag-sway 4.4s ease-in-out infinite;
   transform-box: fill-box;
 }
 
 .bunting-flag:nth-child(3n) {
-  animation-duration: 2.9s;
+  animation-duration: 5s;
 }
 
 .bunting-flag:nth-child(4n) {
-  animation-duration: 2.3s;
+  animation-duration: 3.8s;
 }
 
 @keyframes flag-sway {
   0%, 100% {
-    transform: rotate(-6deg);
+    transform: translateX(-1.5px) rotate(-2deg);
   }
   50% {
-    transform: rotate(6deg);
+    transform: translateX(1.5px) rotate(2deg);
   }
 }
 

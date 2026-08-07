@@ -39,8 +39,9 @@ export default function Bunting() {
       <path
         d={`M0 ${STRING_Y} Q 500 ${STRING_Y + SAG} 1000 ${STRING_Y}`}
         fill="none"
-        stroke="var(--line)"
-        strokeWidth="1"
+        stroke="var(--fg-dim)"
+        strokeWidth="2.5"
+        vectorEffect="non-scaling-stroke"
       />
 
       {FLAGS.map((f, i) => (
