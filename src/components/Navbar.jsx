@@ -1,6 +1,5 @@
 import "./Navbar.css";
 import Flower from "./Flower";
-import Ant from "./Ant";
 import Bunting from "./Bunting";
 import { useLanguage } from "../lib/i18nData";
 
@@ -23,7 +22,7 @@ export default function Navbar() {
       <Bunting />
       <div className="navbar-inner">
         <a href="#" className="navbar-brand" onClick={(e) => scrollTo(e, "body")}>
-          <Flower size={30} floorSelector=".navbar" floorEdge="bottom" />
+          <Flower size={30} floorSelector=".navbar" floorEdge="bottom" wind={320} />
           <div className="navbar-brand-text">
             <span className="navbar-name">Fedor.</span>
             <span className="navbar-tag">english studio</span>
@@ -64,7 +63,6 @@ export default function Navbar() {
           </a>
         </div>
       </div>
-      <Ant edge="bottom" duration="26s" delay="1s" size={16} />
     </header>
   );
 }

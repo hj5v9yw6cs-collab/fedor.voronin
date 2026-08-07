@@ -10,7 +10,7 @@ const COLORS = ["var(--fg)", "var(--fg-dim)", "var(--accent)"];
 // else (including the flags in between) hangs off whatever height the
 // rope actually is at that point, because that's what it's tied to.
 const TIE_Y = 0;
-const SWAG_SAG = 9; // how deep each swag's arc dips at its middle
+const SWAG_SAG = 13; // how deep each swag's arc dips at its middle
 const FLAG_HALF_W = 6;
 const FLAG_H = 9;
 
@@ -63,7 +63,7 @@ export default function Bunting() {
   return (
     <svg
       className="bunting"
-      viewBox="0 0 1000 26"
+      viewBox="0 0 1000 32"
       preserveAspectRatio="none"
       aria-hidden="true"
     >

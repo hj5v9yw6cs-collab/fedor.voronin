@@ -33,7 +33,7 @@ const GRAVITY = 2600; // px/s²
  * random landing height so a few of them visibly overlap at a natural
  * angle instead of lining up in a perfectly flat row.
  */
-function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, floorPadding }) {
+function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, floorPadding, wind = 0 }) {
   const flowerRect = container.getBoundingClientRect();
   const startY = (attach.y / 100) * flowerRect.height;
 
@@ -70,8 +70,13 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
 
   let x = 0;
   let y = 0;
-  let vx = (Math.random() - 0.5) * 90;
-  let vy = -30 - Math.random() * 50;
+  // A gust needs airtime to actually carry something — the navbar's
+  // floor is only a few px below, too short for gravity to give wind
+  // much to work with, so a windy petal gets a bigger upward pop first
+  // (more hang time) and starts already moving with the gust, not
+  // building up to it gradually.
+  let vx = wind !== 0 ? wind * (0.7 + Math.random() * 0.5) : (Math.random() - 0.5) * 90;
+  let vy = wind !== 0 ? -110 - Math.random() * 60 : -30 - Math.random() * 50;
   let rot = 0;
   let last = performance.now();
 
@@ -81,8 +86,9 @@ function dropPetal({ layer, container, attach, size, floorSelector, floorEdge, f
 
     vy += GRAVITY * dt;
     y += vy * dt;
+    vx *= Math.max(0, 1 - (wind !== 0 ? 0.5 : 3) * dt);
+    vx += wind * dt;
     x += vx * dt;
-    vx *= Math.max(0, 1 - 3 * dt);
     rot += vx * dt * 3.5;
 
     if (y >= floor) {
@@ -115,6 +121,7 @@ export default function Flower({
   floorSelector,
   floorEdge = "top",
   floorPadding = 0,
+  wind = 0,
   static: isStatic = false,
   className = "",
 }) {
@@ -130,7 +137,7 @@ export default function Flower({
 
     const shedAll = () => {
       startedRef.current = true;
-      const step = REDUCED_MOTION ? 0 : 480;
+      const step = REDUCED_MOTION ? 0 : 950;
       PETALS.forEach((p, i) => {
         setTimeout(() => {
           setShed((n) => Math.max(n, i + 1));
@@ -143,6 +150,7 @@ export default function Flower({
               floorSelector,
               floorEdge,
               floorPadding,
+              wind,
             });
           }
         }, i * step + 250);
