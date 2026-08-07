@@ -64,6 +64,12 @@ export default function Footer() {
       <div className="footer-bottom">
         <span>{t.copyright(YEAR)}</span>
 
+        <div className="footer-legal">
+          <a href="/privacy.html">{t.privacy}</a>
+          <span>/</span>
+          <a href="/terms.html">{t.terms}</a>
+        </div>
+
         <div className="footer-lang">
           <button
             className={`btn-burst${lang === "ru" ? " is-active" : ""}`}

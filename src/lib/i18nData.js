@@ -70,6 +70,8 @@ export const DICT = {
       contactHeading: "связаться",
       brandName: "Fedor.",
       copyright: (year) => `© ${year} Fedor. English Studio`,
+      privacy: "конфиденциальность",
+      terms: "соглашение",
     },
   },
 
@@ -142,6 +144,8 @@ export const DICT = {
       contactHeading: "contact",
       brandName: "Fedor.",
       copyright: (year) => `© ${year} Fedor. English Studio`,
+      privacy: "privacy policy",
+      terms: "terms of use",
     },
   },
 };
