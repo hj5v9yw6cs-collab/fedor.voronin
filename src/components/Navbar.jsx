@@ -1,6 +1,7 @@
 import "./Navbar.css";
 import Flower from "./Flower";
 import Ant from "./Ant";
+import Bunting from "./Bunting";
 import { useLanguage } from "../lib/i18nData";
 
 function scrollTo(e, href) {
@@ -19,6 +20,7 @@ export default function Navbar() {
 
   return (
     <header className="navbar">
+      <Bunting />
       <div className="navbar-inner">
         <a href="#" className="navbar-brand" onClick={(e) => scrollTo(e, "body")}>
           <Flower size={30} floorSelector=".navbar" floorEdge="bottom" />

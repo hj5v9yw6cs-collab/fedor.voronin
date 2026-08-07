@@ -1,6 +1,5 @@
 import "./Hero.css";
 import StickerPhoto from "./StickerPhoto";
-import ScrollIndicator from "./ScrollIndicator";
 import { useLanguage } from "../lib/i18nData";
 
 export default function Hero() {
@@ -48,8 +47,6 @@ export default function Hero() {
             </button>
 
           </div>
-
-          <ScrollIndicator />
 
         </div>
 

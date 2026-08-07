@@ -1,0 +1,44 @@
+.bunting {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 18px;
+
+  pointer-events: none;
+  overflow: visible;
+}
+
+.bunting-flag {
+  animation: flag-sway 2.6s ease-in-out infinite;
+  transform-box: fill-box;
+}
+
+.bunting-flag:nth-child(3n) {
+  animation-duration: 2.9s;
+}
+
+.bunting-flag:nth-child(4n) {
+  animation-duration: 2.3s;
+}
+
+@keyframes flag-sway {
+  0%, 100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .bunting {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bunting-flag {
+    animation: none;
+  }
+}
