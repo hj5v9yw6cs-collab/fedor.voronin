@@ -3,42 +3,14 @@
   top: 100%;
   left: 0;
   width: 100%;
-  height: 18px;
+  height: 23px;
 
   pointer-events: none;
   overflow: visible;
 }
 
-.bunting-flag {
-  animation: flag-sway 4.4s ease-in-out infinite;
-  transform-box: fill-box;
-}
-
-.bunting-flag:nth-child(3n) {
-  animation-duration: 5s;
-}
-
-.bunting-flag:nth-child(4n) {
-  animation-duration: 3.8s;
-}
-
-@keyframes flag-sway {
-  0%, 100% {
-    transform: translateX(-1.5px) rotate(-2deg);
-  }
-  50% {
-    transform: translateX(1.5px) rotate(2deg);
-  }
-}
-
 @media (max-width: 640px) {
   .bunting {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bunting-flag {
-    animation: none;
   }
 }
