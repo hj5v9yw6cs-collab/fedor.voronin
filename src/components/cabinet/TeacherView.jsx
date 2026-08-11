@@ -12,28 +12,50 @@ function formatDate(iso) {
   });
 }
 
-// Best-effort — a failed notification shouldn't block the lesson save
-// that already succeeded, so callers don't need to handle its errors.
-async function notifyStudent(student, lesson) {
-  if (!student.email) return;
-
+function buildLessonEmail(student, lesson, heading) {
   const lines = [
     `Здравствуйте${student.full_name ? `, ${student.full_name}` : ""}!`,
     "",
-    `Новое занятие назначено на ${formatDate(lesson.scheduled_at)}.`,
+    `${heading} ${formatDate(lesson.scheduled_at)}.`,
   ];
   if (lesson.topic) lines.push(`Тема: ${lesson.topic}`);
   if (lesson.meeting_url) lines.push(`Ссылка на урок: ${lesson.meeting_url}`);
   if (lesson.homework) lines.push(`Домашнее задание: ${lesson.homework}`);
   lines.push("", "Подробности — в личном кабинете на fedorvoronin.ru/cabinet");
+  return lines.join("\n");
+}
 
+// Both best-effort — a failed email shouldn't block whatever the
+// teacher was already doing (the lesson itself is saved regardless,
+// and reminders are a courtesy on top of it).
+async function notifyStudent(student, lesson) {
+  if (!student.email) return;
   try {
     await supabase.functions.invoke("send-email", {
-      body: { to: student.email, subject: "Новое занятие по английскому", text: lines.join("\n") },
+      body: {
+        to: student.email,
+        subject: "Новое занятие по английскому",
+        text: buildLessonEmail(student, lesson, "Новое занятие назначено на"),
+      },
     });
   } catch {
-    // Notification is a nice-to-have, not the source of truth — the
-    // lesson itself is already saved and visible in the cabinet either way.
+    // see comment above
+  }
+}
+
+async function remindStudent(student, lesson) {
+  if (!student.email) return false;
+  try {
+    const { error } = await supabase.functions.invoke("send-email", {
+      body: {
+        to: student.email,
+        subject: "Напоминание о занятии по английскому",
+        text: buildLessonEmail(student, lesson, "Напоминаем: у вас занятие"),
+      },
+    });
+    return !error;
+  } catch {
+    return false;
   }
 }
 
@@ -45,6 +67,8 @@ export default function TeacherView() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [contactDraft, setContactDraft] = useState("");
+  const [reminding, setReminding] = useState(null); // lesson id currently sending
+  const [reminded, setReminded] = useState(null); // lesson id that just sent
 
   function loadStudents(selectId) {
     supabase
@@ -108,6 +132,18 @@ export default function TeacherView() {
     if (!window.confirm("Удалить это занятие?")) return;
     await supabase.from("lessons").delete().eq("id", id);
     loadLessons(selected.id);
+  }
+
+  async function handleRemind(lesson) {
+    setReminding(lesson.id);
+    const ok = await remindStudent(selected, lesson);
+    setReminding(null);
+    if (ok) {
+      setReminded(lesson.id);
+      setTimeout(() => setReminded((id) => (id === lesson.id ? null : id)), 2500);
+    } else {
+      window.alert("Не удалось отправить напоминание — проверьте настройку почты (см. README).");
+    }
   }
 
   if (students === null) return <p className="cabinet-empty">Загрузка учеников…</p>;
@@ -227,6 +263,9 @@ export default function TeacherView() {
                   <div className="lesson-actions">
                     <button onClick={() => setEditing(l.id)}>редактировать</button>
                     <button onClick={() => deleteLesson(l.id)}>удалить</button>
+                    <button onClick={() => handleRemind(l)} disabled={reminding === l.id || !selected.email}>
+                      {reminding === l.id ? "отправляем…" : reminded === l.id ? "отправлено ✓" : "напомнить"}
+                    </button>
                   </div>
                 </div>
               )
