@@ -174,7 +174,7 @@ export default function Test() {
             />
 
             <input
-              type="text"
+              type="email"
               placeholder={t.contactPlaceholder}
               required
               value={contact}
