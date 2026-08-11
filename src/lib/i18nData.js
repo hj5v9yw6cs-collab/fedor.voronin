@@ -7,6 +7,7 @@ export const DICT = {
       test: "тест",
       contacts: "контакты",
       cta: "пройти тест",
+      cabinet: "кабинет",
     },
     hero: {
       label: "английский с федором",
@@ -20,20 +21,19 @@ export const DICT = {
     story: {
       label: "МОЯ ИСТОРИЯ",
       blocks: [
-        "Всё началось\nс желания\nпознакомиться.",
-        "Мне было около пяти лет. Мы с мамой были в путешествии. На площади играли дети, и мне очень хотелось подойти к ним.",
-        "Но оказалось, что мы говорим на разных языках.",
-        "Тогда я впервые понял, что язык — это возможность знакомиться с людьми.",
+        "Мне было лет пять,\nи я толком\nне понимал зачем.",
+        "Мы с мамой отдыхали заграницей. На площади бегали местные дети, и я, конечно, сразу захотел с ними поиграть.",
+        "Подошёл — и понял, что не могу сказать ни слова. Они говорили на своём языке, я на своём, и мы просто стояли и хлопали глазами.",
+        "Вот тогда до меня и дошло: язык — это не оценки в школе, а способ по-настоящему разговаривать с людьми.",
       ],
     },
     features: {
       label: "уровни",
-      title: ["От «hello»", "до свободной речи."],
+      title: ["От «hello»", "до уверенного B2."],
       levels: [
         { code: "A1–A2", label: "Начальный", desc: "Базовые фразы, простые диалоги." },
         { code: "B1", label: "Средний", desc: "Свободно на бытовые темы." },
         { code: "B2", label: "Выше среднего", desc: "Работа, учёба, сложные тексты." },
-        { code: "C1+", label: "Продвинутый", desc: "Свободное владение, нюансы." },
       ],
     },
     test: {
@@ -70,6 +70,8 @@ export const DICT = {
       contactHeading: "связаться",
       brandName: "Fedor.",
       copyright: (year) => `© ${year} Fedor. English Studio`,
+      privacy: "конфиденциальность",
+      terms: "соглашение",
     },
   },
 
@@ -79,6 +81,7 @@ export const DICT = {
       test: "test",
       contacts: "contact",
       cta: "take the test",
+      cabinet: "cabinet",
     },
     hero: {
       label: "english with fedor",
@@ -92,20 +95,19 @@ export const DICT = {
     story: {
       label: "MY STORY",
       blocks: [
-        "It all started\nwith wanting\nto connect.",
-        "I was about five years old. My mum and I were travelling. Kids were playing in the square, and I really wanted to go up to them.",
-        "But it turned out we spoke different languages.",
-        "That's when I first understood that language is a chance to get to know people.",
+        "I was about five,\nand had no idea\nwhy it mattered.",
+        "My mum and I were on a trip abroad. Local kids were running around the square, and of course I wanted to join in.",
+        "I walked up — and realised I couldn't say a single word. They spoke their language, I spoke mine, and we just stood there blinking at each other.",
+        "That's when it hit me: language isn't about grades at school, it's how you actually talk to people.",
       ],
     },
     features: {
       label: "levels",
-      title: ["From \"hello\"", "to speaking freely."],
+      title: ["From \"hello\"", "to a confident B2."],
       levels: [
         { code: "A1–A2", label: "Beginner", desc: "Basic phrases, simple dialogue." },
         { code: "B1", label: "Intermediate", desc: "Comfortable with everyday topics." },
         { code: "B2", label: "Upper-Intermediate", desc: "Work, study, complex texts." },
-        { code: "C1+", label: "Advanced", desc: "Fluent, with nuance." },
       ],
     },
     test: {
@@ -142,6 +144,8 @@ export const DICT = {
       contactHeading: "contact",
       brandName: "Fedor.",
       copyright: (year) => `© ${year} Fedor. English Studio`,
+      privacy: "privacy policy",
+      terms: "terms of use",
     },
   },
 };

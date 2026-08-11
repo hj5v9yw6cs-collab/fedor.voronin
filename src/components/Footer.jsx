@@ -1,4 +1,5 @@
 import "./Footer.css";
+import { Link } from "react-router-dom";
 import Flower from "./Flower";
 import Ant from "./Ant";
 import { useLanguage } from "../lib/i18nData";
@@ -40,6 +41,7 @@ export default function Footer() {
           <span className="footer-heading">{t.navHeading}</span>
           <a href="#story" onClick={(e) => scrollTo(e, "#story")}>{strings.nav.story}</a>
           <a href="#test" onClick={(e) => scrollTo(e, "#test")}>{strings.nav.test}</a>
+          <Link to="/cabinet">{strings.nav.cabinet}</Link>
         </div>
 
         <div className="footer-col">
@@ -63,6 +65,12 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <span>{t.copyright(YEAR)}</span>
+
+        <div className="footer-legal">
+          <a href="/privacy.html">{t.privacy}</a>
+          <span>/</span>
+          <a href="/terms.html">{t.terms}</a>
+        </div>
 
         <div className="footer-lang">
           <button

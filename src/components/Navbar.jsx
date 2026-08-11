@@ -1,4 +1,5 @@
 import "./Navbar.css";
+import { Link } from "react-router-dom";
 import Flower from "./Flower";
 import Bunting from "./Bunting";
 import { useLanguage } from "../lib/i18nData";
@@ -34,6 +35,7 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
+          <Link to="/cabinet">{strings.nav.cabinet}</Link>
         </nav>
 
         <div className="navbar-right">

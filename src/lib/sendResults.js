@@ -52,7 +52,16 @@ export async function sendTestResults({ name, contact, score, total, level, answ
         message,
       }),
     });
-    if (res.ok) return { ok: true, method: "email" };
+    // FormSubmit answers with HTTP 200 even when it didn't actually send
+    // anything — e.g. the destination address hasn't clicked its one-time
+    // "Activate Form" link yet. It signals that in the JSON body
+    // (success: "false"/false), not the HTTP status, so `res.ok` alone
+    // was reporting success on deliveries that never happened. Only treat
+    // it as sent once the body confirms success too.
+    const data = await res.json().catch(() => null);
+    if (res.ok && data && (data.success === true || data.success === "true")) {
+      return { ok: true, method: "email" };
+    }
   } catch {
     // network error — fall through to mailto below
   }

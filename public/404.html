@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- GitHub Pages has no server-side routing, so a direct visit or
+       refresh on a deep link like /cabinet 404s here. This redirects it
+       back to index.html with the path preserved in a query string,
+       which index.html's inline script then restores. Standard trick,
+       see https://github.com/rafgraph/spa-github-pages -->
+  <script>
+    var segmentCount = 0;
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
+      l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
+</head>
+<body></body>
+</html>
