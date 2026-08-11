@@ -17,15 +17,31 @@ export default function TeacherView() {
   const [selected, setSelected] = useState(null);
   const [lessons, setLessons] = useState(null);
   const [editing, setEditing] = useState(null); // lesson id being edited, or "new"
+  const [renaming, setRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
 
-  useEffect(() => {
+  function loadStudents(selectId) {
     supabase
       .from("profiles")
       .select("*")
       .eq("role", "student")
       .order("full_name")
-      .then(({ data }) => setStudents(data ?? []));
+      .then(({ data }) => {
+        const list = data ?? [];
+        setStudents(list);
+        if (selectId) setSelected(list.find((s) => s.id === selectId) ?? null);
+      });
+  }
+
+  useEffect(() => {
+    loadStudents();
   }, []);
+
+  async function saveName() {
+    await supabase.from("profiles").update({ full_name: nameDraft.trim() }).eq("id", selected.id);
+    setRenaming(false);
+    loadStudents(selected.id);
+  }
 
   function loadLessons(studentId) {
     setLessons(null);
@@ -40,6 +56,7 @@ export default function TeacherView() {
   function selectStudent(student) {
     setSelected(student);
     setEditing(null);
+    setRenaming(false);
     loadLessons(student.id);
   }
 
@@ -79,14 +96,45 @@ export default function TeacherView() {
             className={`student-pill${selected?.id === s.id ? " is-active" : ""}`}
             onClick={() => selectStudent(s)}
           >
-            {s.full_name || s.contact || "без имени"}
+            {s.full_name || s.email || s.contact || "без имени"}
           </button>
         ))}
       </div>
 
       {selected && (
         <section className="cabinet-section">
-          <h2>занятия — {selected.full_name || selected.contact}</h2>
+          {renaming ? (
+            <div className="material-row" style={{ marginBottom: 16 }}>
+              <input
+                type="text"
+                placeholder="имя ученика"
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                autoFocus
+              />
+              <button type="button" onClick={saveName}>
+                сохранить
+              </button>
+              <button type="button" onClick={() => setRenaming(false)}>
+                ✕
+              </button>
+            </div>
+          ) : (
+            <h2>
+              занятия — {selected.full_name || selected.email || selected.contact}{" "}
+              <button
+                type="button"
+                className="material-add"
+                style={{ marginLeft: 8, textTransform: "none", letterSpacing: 0 }}
+                onClick={() => {
+                  setNameDraft(selected.full_name || "");
+                  setRenaming(true);
+                }}
+              >
+                изменить имя
+              </button>
+            </h2>
+          )}
 
           {editing === "new" ? (
             <LessonForm onSave={saveLesson} onCancel={() => setEditing(null)} />

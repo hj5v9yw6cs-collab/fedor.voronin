@@ -8,6 +8,9 @@
 create table if not exists profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   full_name text,
+  email text,                 -- copied from auth.users at creation, so the
+                               -- teacher can tell students apart before
+                               -- bothering to set a display name
   contact text,               -- telegram / instagram of the student
   role text not null default 'student' check (role in ('student', 'teacher')),
   created_at timestamptz not null default now()
@@ -42,14 +45,19 @@ create policy "profiles: teacher reads everyone"
   on profiles for select
   using (is_teacher());
 
+create policy "profiles: teacher updates everyone"
+  on profiles for update
+  using (is_teacher())
+  with check (is_teacher());
+
 -- Auto-create the profile row the moment a new auth user is added.
 -- Every new user starts as a student — promote yourself to 'teacher'
 -- with the one-off SQL command in the README after your own first login.
 create or replace function handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, full_name)
-  values (new.id, new.raw_user_meta_data ->> 'full_name');
+  insert into public.profiles (id, full_name, email)
+  values (new.id, new.raw_user_meta_data ->> 'full_name', new.email);
   return new;
 end;
 $$ language plpgsql security definer;
