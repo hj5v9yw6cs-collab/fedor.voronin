@@ -7,6 +7,7 @@ export const DICT = {
       test: "тест",
       contacts: "контакты",
       cta: "пройти тест",
+      cabinet: "кабинет",
     },
     hero: {
       label: "английский с федором",
@@ -80,6 +81,7 @@ export const DICT = {
       test: "test",
       contacts: "contact",
       cta: "take the test",
+      cabinet: "cabinet",
     },
     hero: {
       label: "english with fedor",
