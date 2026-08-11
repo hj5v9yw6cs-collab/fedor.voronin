@@ -4,6 +4,7 @@ import { QUESTIONS, getLevel } from "../lib/testQuestions";
 import { sendTestResults } from "../lib/sendResults";
 import { speak, canSpeak } from "../lib/speak";
 import { useLanguage } from "../lib/i18nData";
+import { useAuth } from "../lib/authData";
 import Ant from "./Ant";
 
 const EMPTY_ANSWERS = Array(QUESTIONS.length).fill(null);
@@ -35,6 +36,7 @@ function ListenBlock({ text, listenLabel, listenAgainLabel }) {
 export default function Test() {
   const { strings } = useLanguage();
   const t = strings.test;
+  const { user } = useAuth();
 
   const [step, setStep] = useState("intro"); // intro | quiz | contact | sending | done
   const [current, setCurrent] = useState(0);
@@ -42,6 +44,22 @@ export default function Test() {
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [result, setResult] = useState(null);
+
+  // Logged-in students/teacher already have lessons in the cabinet —
+  // the placement test is for first-time visitors, not returning users.
+  if (user) {
+    return (
+      <section id="test" className="test">
+        <div className="test-container">
+          <span className="test-label">{t.label}</span>
+          <div className="test-intro">
+            <h2>{t.loggedInTitle}</h2>
+            <p>{t.loggedInText}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const reset = () => {
     setStep("intro");

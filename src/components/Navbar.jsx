@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Flower from "./Flower";
 import Bunting from "./Bunting";
 import { useLanguage } from "../lib/i18nData";
+import { useAuth } from "../lib/authData";
 
 function scrollTo(e, href) {
   e.preventDefault();
@@ -11,6 +12,7 @@ function scrollTo(e, href) {
 
 export default function Navbar() {
   const { lang, setLang, strings } = useLanguage();
+  const { user } = useAuth();
   const links = [
     { href: "#story", label: strings.nav.story },
     { href: "#test", label: strings.nav.test },
@@ -62,13 +64,15 @@ export default function Navbar() {
             </button>
           </div>
 
-          <a
-            href="#test"
-            className="navbar-cta btn-burst"
-            onClick={(e) => scrollTo(e, "#test")}
-          >
-            {strings.nav.cta}
-          </a>
+          {!user && (
+            <a
+              href="#test"
+              className="navbar-cta btn-burst"
+              onClick={(e) => scrollTo(e, "#test")}
+            >
+              {strings.nav.cta}
+            </a>
+          )}
         </div>
       </div>
     </header>
