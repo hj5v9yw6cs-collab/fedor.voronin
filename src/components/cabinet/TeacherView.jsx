@@ -130,7 +130,7 @@ export default function TeacherView() {
             className={`student-pill${selected?.id === s.id ? " is-active" : ""}`}
             onClick={() => selectStudent(s)}
           >
-            {s.full_name ? `${s.full_name} (${s.email})` : s.email || s.contact || "без имени"}
+            {s.full_name || s.email || s.contact || "без имени"}
           </button>
         ))}
       </div>
@@ -168,22 +168,27 @@ export default function TeacherView() {
               </div>
             </div>
           ) : (
-            <h2>
-              занятия — {selected.full_name || selected.email} ({selected.email}
-              {selected.contact ? `, ${selected.contact}` : ""}){" "}
-              <button
-                type="button"
-                className="material-add"
-                style={{ marginLeft: 8, textTransform: "none", letterSpacing: 0 }}
-                onClick={() => {
-                  setNameDraft(selected.full_name || "");
-                  setContactDraft(selected.contact || "");
-                  setEditingProfile(true);
-                }}
-              >
-                изменить
-              </button>
-            </h2>
+            <div style={{ marginBottom: 20 }}>
+              <h2 style={{ marginBottom: 4 }}>
+                занятия — {selected.full_name || selected.email}{" "}
+                <button
+                  type="button"
+                  className="material-add"
+                  style={{ marginLeft: 8, textTransform: "none", letterSpacing: 0 }}
+                  onClick={() => {
+                    setNameDraft(selected.full_name || "");
+                    setContactDraft(selected.contact || "");
+                    setEditingProfile(true);
+                  }}
+                >
+                  изменить
+                </button>
+              </h2>
+              <p className="cabinet-note" style={{ fontSize: 13 }}>
+                {selected.email}
+                {selected.contact ? ` · ${selected.contact}` : ""}
+              </p>
+            </div>
           )}
 
           {editing === "new" ? (
