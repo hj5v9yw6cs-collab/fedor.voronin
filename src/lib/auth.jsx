@@ -13,8 +13,10 @@ export function AuthProvider({ children }) {
   // The profile is tagged with the user id it was fetched for, so
   // "still loading" and "belongs to a stale session" can both be
   // derived by comparing it to the current userId — no separate
-  // loading flag to keep in sync by hand.
-  const [fetchedProfile, setFetchedProfile] = useState({ id: null, profile: null });
+  // loading flag to keep in sync by hand. `error` carries the reason
+  // when the row genuinely wasn't found (or RLS denied it), so the UI
+  // can say why instead of showing "loading" forever.
+  const [fetchedProfile, setFetchedProfile] = useState({ id: null, profile: null, error: null });
 
   useEffect(() => {
     if (!isCabinetEnabled) return;
@@ -38,10 +40,13 @@ export function AuthProvider({ children }) {
       .select("*")
       .eq("id", userId)
       .single()
-      .then(({ data }) => setFetchedProfile({ id: userId, profile: data ?? null }));
+      .then(({ data, error }) =>
+        setFetchedProfile({ id: userId, profile: data ?? null, error: data ? null : error })
+      );
   }, [userId]);
 
   const profile = userId && fetchedProfile.id === userId ? fetchedProfile.profile : null;
+  const profileError = userId && fetchedProfile.id === userId ? fetchedProfile.error : null;
   const profileLoading = Boolean(userId) && fetchedProfile.id !== userId;
   const loading = isCabinetEnabled && (sessionLoading || profileLoading);
 
@@ -50,6 +55,7 @@ export function AuthProvider({ children }) {
     session,
     user: session?.user ?? null,
     profile,
+    profileError,
     loading,
     signIn: (email, password) =>
       supabase.auth.signInWithPassword({ email, password }),

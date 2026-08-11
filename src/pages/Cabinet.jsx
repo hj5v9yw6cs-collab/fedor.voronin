@@ -22,7 +22,7 @@ function Shell({ children }) {
 }
 
 export default function Cabinet() {
-  const { enabled, loading, user, profile, signOut } = useAuth();
+  const { enabled, loading, user, profile, profileError, signOut } = useAuth();
 
   if (!isCabinetEnabled || !enabled) {
     return (
@@ -53,7 +53,21 @@ export default function Cabinet() {
   if (!profile) {
     return (
       <Shell>
-        <p className="cabinet-note">Загрузка профиля…</p>
+        <p className="cabinet-note">
+          Не удалось найти профиль для этого аккаунта.
+          {profileError && (
+            <>
+              <br />
+              <span className="cabinet-error">{profileError.message}</span>
+            </>
+          )}
+          <br />
+          Если вы только что создали аккаунт — попробуйте выйти и войти
+          заново; если не поможет, напишите администратору сайта.
+        </p>
+        <button className="cabinet-signout btn-burst" onClick={signOut}>
+          выйти
+        </button>
       </Shell>
     );
   }
