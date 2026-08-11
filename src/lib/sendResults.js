@@ -19,6 +19,46 @@ function buildMessage({ name, contact, score, total, level, answers }) {
   return lines.join("\n");
 }
 
+// Posts straight to FormSubmit's plain (non-AJAX) endpoint via a hidden
+// iframe, instead of `fetch`. This isn't just a style choice: FormSubmit's
+// `/ajax/` endpoint won't send the one-time "Activate Form" email at all
+// until the destination address has received a *plain* form submission
+// first — an AJAX-only integration can end up never activating, which is
+// what happened here. A real form POST is also what FormSubmit's own
+// spam/activation flow is built around, so this is the reliable path,
+// not a fallback.
+function postViaHiddenForm(fields) {
+  const frameName = `formsubmit-target-${Date.now()}`;
+  const iframe = document.createElement("iframe");
+  iframe.name = frameName;
+  iframe.style.display = "none";
+  document.body.appendChild(iframe);
+
+  const form = document.createElement("form");
+  form.action = `https://formsubmit.co/${OWNER_EMAIL}`;
+  form.method = "POST";
+  form.target = frameName;
+  form.style.display = "none";
+
+  for (const [name, value] of Object.entries(fields)) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value ?? "";
+    form.appendChild(input);
+  }
+
+  document.body.appendChild(form);
+  form.submit();
+
+  // The navigation inside the iframe has already been kicked off
+  // synchronously by .submit() — safe to clean up shortly after.
+  setTimeout(() => {
+    form.remove();
+    iframe.remove();
+  }, 5000);
+}
+
 /**
  * Sends a finished test to the owner's inbox via FormSubmit
  * (https://formsubmit.co) — a free form-to-email relay that needs no
@@ -26,12 +66,14 @@ function buildMessage({ name, contact, score, total, level, answers }) {
  *
  * IMPORTANT: the very first submission ever sent to an email address
  * doesn't deliver — FormSubmit instead emails that address an
- * "Activate your form" link. Someone has to click it once; every
- * submission after that arrives normally. See README.
+ * "Activate Form" link. Someone has to click it once; every submission
+ * after that arrives normally. See README.
  *
- * If the request fails (offline, relay down, not yet activated with no
- * way to know), we fall back to opening the visitor's mail client with
- * the results pre-filled, so nothing is silently lost.
+ * A plain form POST has no readable response (it's a cross-origin
+ * navigation inside a hidden iframe), so unlike a `fetch` call there's
+ * no way to detect failure here and fall back automatically. If nothing
+ * ever arrives, the fix is almost always the one-time activation step
+ * above, not a bug in this function.
  */
 export async function sendTestResults({ name, contact, score, total, level, answers }) {
   const withPicks = QUESTIONS.map((item, i) => ({ ...item, picked: answers[i]?.text }));
@@ -39,34 +81,22 @@ export async function sendTestResults({ name, contact, score, total, level, answ
   const subject = `Результат теста — ${name || "аноним"} (${level.code})`;
 
   try {
-    const res = await fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({
-        _subject: subject,
-        _template: "box",
-        name: name || "Аноним",
-        contact,
-        level: `${level.code} — ${level.label}`,
-        score: `${score}/${total}`,
-        message,
-      }),
+    postViaHiddenForm({
+      _subject: subject,
+      _template: "box",
+      _captcha: "false",
+      name: name || "Аноним",
+      contact,
+      level: `${level.code} — ${level.label}`,
+      score: `${score}/${total}`,
+      message,
     });
-    // FormSubmit answers with HTTP 200 even when it didn't actually send
-    // anything — e.g. the destination address hasn't clicked its one-time
-    // "Activate Form" link yet. It signals that in the JSON body
-    // (success: "false"/false), not the HTTP status, so `res.ok` alone
-    // was reporting success on deliveries that never happened. Only treat
-    // it as sent once the body confirms success too.
-    const data = await res.json().catch(() => null);
-    if (res.ok && data && (data.success === true || data.success === "true")) {
-      return { ok: true, method: "email" };
-    }
+    return { ok: true, method: "email" };
   } catch {
-    // network error — fall through to mailto below
+    // Only reachable if the DOM manipulation itself throws (e.g. no
+    // `document` available) — genuinely unexpected in a browser.
+    const body = encodeURIComponent(message);
+    window.location.href = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${body}`;
+    return { ok: true, method: "mailto" };
   }
-
-  const body = encodeURIComponent(message);
-  window.location.href = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${body}`;
-  return { ok: true, method: "mailto" };
 }
