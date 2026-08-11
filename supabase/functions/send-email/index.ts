@@ -15,11 +15,7 @@
 // cost), same exposure level the old FormSubmit integration already had.
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-// Resend's shared sandbox sender — works immediately, no domain setup.
-// Swap for something like "Fedor. English Studio <hello@fedorvoronin.ru>"
-// once fedorvoronin.ru is verified as a sending domain in Resend, for a
-// less spam-flaggy from-address.
-const FROM = "Fedor. English Studio <onboarding@resend.dev>";
+const FROM = "Fedor. English Studio <hello@fedorvoronin.ru>";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
