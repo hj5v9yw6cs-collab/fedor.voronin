@@ -55,6 +55,8 @@ export const DICT = {
       resultCorrect: (score, total) => `Правильных ответов: ${score} из ${total}.`,
       resultNote: "Результат также отправлен на почту — скоро свяжусь с вами.",
       retryBtn: "пройти ещё раз",
+      loggedInTitle: "Чиним.",
+      loggedInText: "Скоро здесь появится что-то интересное.",
       levels: {
         A1: "Начальный",
         A2: "Элементарный",
@@ -129,6 +131,8 @@ export const DICT = {
       resultCorrect: (score, total) => `Correct answers: ${score} of ${total}.`,
       resultNote: "The result was also emailed over — I'll be in touch soon.",
       retryBtn: "take it again",
+      loggedInTitle: "Under construction.",
+      loggedInText: "Something interesting is coming here soon.",
       levels: {
         A1: "Beginner",
         A2: "Elementary",
