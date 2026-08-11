@@ -19,11 +19,28 @@ create policy "profiles: read own row"
   on profiles for select
   using (auth.uid() = id);
 
+-- Whether the signed-in user is a teacher. This runs `security definer`
+-- (as the function's owner, not the caller), which is what lets it read
+-- `profiles` without re-triggering that table's own RLS policies —
+-- a policy that queries `profiles` directly from inside itself sends
+-- Postgres into "infinite recursion detected in policy for relation
+-- profiles". Routing that lookup through this function is the standard
+-- Supabase fix.
+create or replace function is_teacher()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from profiles where id = auth.uid() and role = 'teacher'
+  );
+$$;
+
 create policy "profiles: teacher reads everyone"
   on profiles for select
-  using (exists (
-    select 1 from profiles p where p.id = auth.uid() and p.role = 'teacher'
-  ));
+  using (is_teacher());
 
 -- Auto-create the profile row the moment a new auth user is added.
 -- Every new user starts as a student — promote yourself to 'teacher'
@@ -64,15 +81,9 @@ create policy "lessons: student reads own"
 
 create policy "lessons: teacher reads all"
   on lessons for select
-  using (exists (
-    select 1 from profiles p where p.id = auth.uid() and p.role = 'teacher'
-  ));
+  using (is_teacher());
 
 create policy "lessons: teacher writes all"
   on lessons for all
-  using (exists (
-    select 1 from profiles p where p.id = auth.uid() and p.role = 'teacher'
-  ))
-  with check (exists (
-    select 1 from profiles p where p.id = auth.uid() and p.role = 'teacher'
-  ));
+  using (is_teacher())
+  with check (is_teacher());
