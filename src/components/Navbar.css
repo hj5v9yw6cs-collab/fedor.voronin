@@ -69,6 +69,28 @@
   gap: 18px;
 }
 
+.navbar-cabinet {
+  font-size: 13px;
+  color: var(--fg-dim);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.navbar-cabinet:hover {
+  color: var(--fg);
+  border-color: var(--fg-dim);
+}
+
+@media (max-width: 480px) {
+  .navbar-cabinet {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}
+
 .navbar-lang {
   display: flex;
   align-items: center;

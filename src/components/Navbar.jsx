@@ -35,10 +35,17 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
-          <Link to="/cabinet">{strings.nav.cabinet}</Link>
         </nav>
 
         <div className="navbar-right">
+          {/* Kept outside .navbar-nav (hidden below 900px) — unlike the
+              other links, this leads to a separate page, not a section
+              you can just scroll to, so it needs to stay reachable on
+              mobile too. */}
+          <Link to="/cabinet" className="navbar-cabinet">
+            {strings.nav.cabinet}
+          </Link>
+
           <div className="navbar-lang">
             <button
               className={`btn-burst${lang === "ru" ? " is-active" : ""}`}

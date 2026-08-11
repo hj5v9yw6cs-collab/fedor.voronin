@@ -12,13 +12,39 @@ function formatDate(iso) {
   });
 }
 
+// Best-effort — a failed notification shouldn't block the lesson save
+// that already succeeded, so callers don't need to handle its errors.
+async function notifyStudent(student, lesson) {
+  if (!student.email) return;
+
+  const lines = [
+    `Здравствуйте${student.full_name ? `, ${student.full_name}` : ""}!`,
+    "",
+    `Новое занятие назначено на ${formatDate(lesson.scheduled_at)}.`,
+  ];
+  if (lesson.topic) lines.push(`Тема: ${lesson.topic}`);
+  if (lesson.meeting_url) lines.push(`Ссылка на урок: ${lesson.meeting_url}`);
+  if (lesson.homework) lines.push(`Домашнее задание: ${lesson.homework}`);
+  lines.push("", "Подробности — в личном кабинете на fedorvoronin.ru/cabinet");
+
+  try {
+    await supabase.functions.invoke("send-email", {
+      body: { to: student.email, subject: "Новое занятие по английскому", text: lines.join("\n") },
+    });
+  } catch {
+    // Notification is a nice-to-have, not the source of truth — the
+    // lesson itself is already saved and visible in the cabinet either way.
+  }
+}
+
 export default function TeacherView() {
   const [students, setStudents] = useState(null);
   const [selected, setSelected] = useState(null);
   const [lessons, setLessons] = useState(null);
   const [editing, setEditing] = useState(null); // lesson id being edited, or "new"
-  const [renaming, setRenaming] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
+  const [contactDraft, setContactDraft] = useState("");
 
   function loadStudents(selectId) {
     supabase
@@ -37,9 +63,12 @@ export default function TeacherView() {
     loadStudents();
   }, []);
 
-  async function saveName() {
-    await supabase.from("profiles").update({ full_name: nameDraft.trim() }).eq("id", selected.id);
-    setRenaming(false);
+  async function saveProfile() {
+    await supabase
+      .from("profiles")
+      .update({ full_name: nameDraft.trim(), contact: contactDraft.trim() })
+      .eq("id", selected.id);
+    setEditingProfile(false);
     loadStudents(selected.id);
   }
 
@@ -56,13 +85,18 @@ export default function TeacherView() {
   function selectStudent(student) {
     setSelected(student);
     setEditing(null);
-    setRenaming(false);
+    setEditingProfile(false);
     loadLessons(student.id);
   }
 
   async function saveLesson(values) {
     if (editing === "new") {
-      await supabase.from("lessons").insert({ ...values, student_id: selected.id });
+      const { data } = await supabase
+        .from("lessons")
+        .insert({ ...values, student_id: selected.id })
+        .select()
+        .single();
+      if (data) notifyStudent(selected, data);
     } else {
       await supabase.from("lessons").update(values).eq("id", editing);
     }
@@ -96,42 +130,58 @@ export default function TeacherView() {
             className={`student-pill${selected?.id === s.id ? " is-active" : ""}`}
             onClick={() => selectStudent(s)}
           >
-            {s.full_name || s.email || s.contact || "без имени"}
+            {s.full_name ? `${s.full_name} (${s.email})` : s.email || s.contact || "без имени"}
           </button>
         ))}
       </div>
 
       {selected && (
         <section className="cabinet-section">
-          {renaming ? (
-            <div className="material-row" style={{ marginBottom: 16 }}>
-              <input
-                type="text"
-                placeholder="имя ученика"
-                value={nameDraft}
-                onChange={(e) => setNameDraft(e.target.value)}
-                autoFocus
-              />
-              <button type="button" onClick={saveName}>
-                сохранить
-              </button>
-              <button type="button" onClick={() => setRenaming(false)}>
-                ✕
-              </button>
+          {editingProfile ? (
+            <div className="cabinet-form" style={{ marginBottom: 24 }}>
+              <label>
+                Имя
+                <input
+                  type="text"
+                  placeholder="имя ученика"
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  autoFocus
+                />
+              </label>
+              <label>
+                Контакт (telegram / instagram)
+                <input
+                  type="text"
+                  placeholder="@username"
+                  value={contactDraft}
+                  onChange={(e) => setContactDraft(e.target.value)}
+                />
+              </label>
+              <div className="lesson-actions">
+                <button type="button" className="btn-burst cabinet-submit" onClick={saveProfile}>
+                  сохранить
+                </button>
+                <button type="button" onClick={() => setEditingProfile(false)}>
+                  отмена
+                </button>
+              </div>
             </div>
           ) : (
             <h2>
-              занятия — {selected.full_name || selected.email || selected.contact}{" "}
+              занятия — {selected.full_name || selected.email} ({selected.email}
+              {selected.contact ? `, ${selected.contact}` : ""}){" "}
               <button
                 type="button"
                 className="material-add"
                 style={{ marginLeft: 8, textTransform: "none", letterSpacing: 0 }}
                 onClick={() => {
                   setNameDraft(selected.full_name || "");
-                  setRenaming(true);
+                  setContactDraft(selected.contact || "");
+                  setEditingProfile(true);
                 }}
               >
-                изменить имя
+                изменить
               </button>
             </h2>
           )}
