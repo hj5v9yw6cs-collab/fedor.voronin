@@ -18,20 +18,26 @@ function ListenBlock({ text, audioSrc, listenLabel, listenAgainLabel }) {
   // questions that don't (yet) have one.
   if (audioSrc) {
     return (
-      <button
-        type="button"
-        className="test-listen btn-burst"
-        onClick={() => {
-          const audio = audioRef.current;
-          audio.currentTime = 0;
-          audio.play();
-          setPlayed(true);
-        }}
-      >
+      <>
+        {/* Kept as a sibling, not nested inside the button — some
+            browsers are inconsistent about an <audio> child inside a
+            <button>, and it's not worth the risk for something this
+            easy to just place next to it instead. */}
         <audio ref={audioRef} src={audioSrc} preload="none" />
-        <span className="test-listen-icon">{played ? "↻" : "▶"}</span>
-        {played ? listenAgainLabel : listenLabel}
-      </button>
+        <button
+          type="button"
+          className="test-listen btn-burst"
+          onClick={() => {
+            const audio = audioRef.current;
+            audio.currentTime = 0;
+            audio.play().catch((err) => console.error("Playback failed:", err));
+            setPlayed(true);
+          }}
+        >
+          <span className="test-listen-icon">{played ? "↻" : "▶"}</span>
+          {played ? listenAgainLabel : listenLabel}
+        </button>
+      </>
     );
   }
 
