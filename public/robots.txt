@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /cabinet
+
+Sitemap: https://fedorvoronin.ru/sitemap.xml
