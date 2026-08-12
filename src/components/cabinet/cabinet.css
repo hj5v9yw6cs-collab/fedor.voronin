@@ -128,6 +128,10 @@
   margin-bottom: 14px;
 }
 
+.lesson-card-past {
+  opacity: 0.55;
+}
+
 .lesson-date {
   font-weight: 700;
   font-size: 15px;
@@ -285,6 +289,11 @@
   padding: 2px 8px;
   margin-left: 10px;
   vertical-align: middle;
+}
+
+.lesson-badge-muted {
+  color: var(--fg-dim);
+  border-color: var(--line);
 }
 
 /* -- week overview -- */

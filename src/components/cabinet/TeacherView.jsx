@@ -270,6 +270,10 @@ export default function TeacherView() {
   const [notesDraft, setNotesDraft] = useState("");
   const [reminding, setReminding] = useState(null); // lesson id currently sending
   const [reminded, setReminded] = useState(null); // lesson id that just sent
+  // Snapshotted whenever lessons load, rather than read live during
+  // render — Date.now() is impure and React lint (rightly) rejects
+  // calling it directly in the render body.
+  const [nowMs, setNowMs] = useState(0);
 
   function loadStudents(selectId) {
     supabase
@@ -304,7 +308,10 @@ export default function TeacherView() {
       .select("*")
       .eq("student_id", studentId)
       .order("scheduled_at", { ascending: false })
-      .then(({ data }) => setLessons(data ?? []));
+      .then(({ data }) => {
+        setLessons(data ?? []);
+        setNowMs(Date.now());
+      });
   }
 
   function selectStudent(student) {
@@ -458,8 +465,9 @@ export default function TeacherView() {
           ) : lessons.length === 0 ? (
             <p className="cabinet-empty">Занятий пока нет.</p>
           ) : (
-            lessons.map((l) =>
-              editing === l.id ? (
+            lessons.map((l) => {
+              const isPast = new Date(l.scheduled_at).getTime() < nowMs;
+              return editing === l.id ? (
                 <LessonForm
                   key={l.id}
                   initial={l}
@@ -467,9 +475,10 @@ export default function TeacherView() {
                   onCancel={() => setEditing(null)}
                 />
               ) : (
-                <div className="lesson-card" key={l.id}>
+                <div className={`lesson-card${isPast ? " lesson-card-past" : ""}`} key={l.id}>
                   <div className="lesson-date">
                     {formatDate(l.scheduled_at)}
+                    {isPast && <span className="lesson-badge lesson-badge-muted">прошло</span>}
                     {l.paid && <span className="lesson-badge">оплачено</span>}
                     {l.homework_done && <span className="lesson-badge">дз готово</span>}
                   </div>
@@ -491,13 +500,15 @@ export default function TeacherView() {
                   <div className="lesson-actions">
                     <button onClick={() => setEditing(l.id)}>редактировать</button>
                     <button onClick={() => deleteLesson(l.id)}>удалить</button>
-                    <button onClick={() => handleRemind(l)} disabled={reminding === l.id || !selected.email}>
-                      {reminding === l.id ? "отправляем…" : reminded === l.id ? "отправлено ✓" : "напомнить"}
-                    </button>
+                    {!isPast && (
+                      <button onClick={() => handleRemind(l)} disabled={reminding === l.id || !selected.email}>
+                        {reminding === l.id ? "отправляем…" : reminded === l.id ? "отправлено ✓" : "напомнить"}
+                      </button>
+                    )}
                   </div>
                 </div>
-              )
-            )
+              );
+            })
           )}
         </section>
       )}
