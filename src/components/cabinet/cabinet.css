@@ -319,3 +319,35 @@
   color: var(--fg-dim);
   margin-left: auto;
 }
+
+@media (max-width: 560px) {
+  .lesson-actions {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+
+  .material-row {
+    flex-wrap: wrap;
+  }
+
+  .material-row input {
+    flex-basis: 100%;
+  }
+
+  .week-item {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .week-item-date {
+    min-width: 0;
+  }
+
+  .week-item-paid {
+    margin-left: 0;
+  }
+
+  .cabinet-header {
+    flex-wrap: wrap;
+  }
+}

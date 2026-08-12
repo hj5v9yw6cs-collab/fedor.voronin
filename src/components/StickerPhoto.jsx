@@ -1,5 +1,5 @@
 import "./StickerPhoto.css";
-import photo from "../assets/me.png";
+import photo from "../assets/me.jpg";
 import { useLanguage } from "../lib/i18nData";
 
 export default function StickerPhoto() {
@@ -13,6 +13,10 @@ export default function StickerPhoto() {
           src={photo}
           alt="Федор"
           className="photo"
+          width="920"
+          height="689"
+          decoding="async"
+          fetchPriority="high"
         />
       </div>
 
