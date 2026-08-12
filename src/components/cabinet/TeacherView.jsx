@@ -63,9 +63,10 @@ function sameDay(a, b) {
   return a && b && a.toDateString() === b.toDateString();
 }
 
-const ZOOM_MIN = 0.7;
+const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 1.6;
 const ZOOM_STEP = 0.1;
+const CALENDAR_BASE_WIDTH = 460; // px, at zoom = 1
 
 function Calendar({ onPickStudent }) {
   const [monthStart, setMonthStart] = useState(() => {
@@ -143,7 +144,11 @@ function Calendar({ onPickStudent }) {
         </span>
       </div>
 
-      <div style={{ zoom }}>
+      {/* Scaling the grid's own max-width (rather than a CSS zoom/transform)
+          actually resizes the cells themselves, not just the text inside
+          them — zoom scaled font size fine but left the grid's physical
+          footprint on the page basically unchanged. */}
+      <div style={{ maxWidth: `${CALENDAR_BASE_WIDTH * zoom}px`, margin: "0 auto" }}>
       <div className="calendar-weekdays">
         {["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map((d) => (
           <span key={d}>{d}</span>
