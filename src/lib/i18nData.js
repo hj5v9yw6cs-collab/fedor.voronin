@@ -77,7 +77,7 @@ export const DICT = {
       cookies: "cookie",
     },
     cookieBanner: {
-      text: "Сайт использует cookie (Яндекс.Метрика).",
+      text: "Сайт использует cookie.",
       linkText: "подробнее",
       accept: "ладненько",
     },
@@ -159,7 +159,7 @@ export const DICT = {
       cookies: "cookies",
     },
     cookieBanner: {
-      text: "This site uses cookies (Yandex.Metrika).",
+      text: "This site uses cookies.",
       linkText: "learn more",
       accept: "got it",
     },
