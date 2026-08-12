@@ -101,17 +101,13 @@ function WeekOverview({ onPickStudent }) {
   );
 }
 
-// Deterministic pseudo-random "cover color" per book, so the same
-// material always looks the same rather than shuffling colors on every
-// reload — picked from a small Minecraft-dye-ish palette.
-const BOOK_COLORS = [
-  "#b02e26", "#f9801d", "#fed83d", "#80c71f", "#3ab3da",
-  "#3c44aa", "#8932b8", "#c74ebd", "#835432", "#5e7c16",
-];
-function bookColor(id) {
+// Deterministic pseudo-random height per book, so the same material
+// always looks the same rather than reshuffling on every reload — just
+// enough variation for an organic "row of spines" rhythm, no color.
+function bookHeight(id) {
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  return BOOK_COLORS[hash % BOOK_COLORS.length];
+  return 34 + (hash % 18); // 34–52px
 }
 
 function Bookshelf({ items, onRemove }) {
@@ -119,13 +115,13 @@ function Bookshelf({ items, onRemove }) {
     <div className="bookshelf-wrap">
       <div className="bookshelf-frame">
         {items.length === 0 ? (
-          <p className="bookshelf-empty">полка пуста —<br />добавьте первую книгу</p>
+          <p className="bookshelf-empty">полка пуста — добавьте первую книгу</p>
         ) : (
           items.map((m) => (
             <a
               key={m.id}
               className="book"
-              style={{ "--book-color": bookColor(m.id) }}
+              style={{ height: `${bookHeight(m.id)}px` }}
               href={m.url}
               target="_blank"
               rel="noreferrer"
