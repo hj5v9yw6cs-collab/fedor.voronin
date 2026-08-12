@@ -101,6 +101,56 @@ function WeekOverview({ onPickStudent }) {
   );
 }
 
+// Deterministic pseudo-random "cover color" per book, so the same
+// material always looks the same rather than shuffling colors on every
+// reload — picked from a small Minecraft-dye-ish palette.
+const BOOK_COLORS = [
+  "#b02e26", "#f9801d", "#fed83d", "#80c71f", "#3ab3da",
+  "#3c44aa", "#8932b8", "#c74ebd", "#835432", "#5e7c16",
+];
+function bookColor(id) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return BOOK_COLORS[hash % BOOK_COLORS.length];
+}
+
+function Bookshelf({ items, onRemove }) {
+  return (
+    <div className="bookshelf-wrap">
+      <div className="bookshelf-frame">
+        {items.length === 0 ? (
+          <p className="bookshelf-empty">полка пуста —<br />добавьте первую книгу</p>
+        ) : (
+          items.map((m) => (
+            <a
+              key={m.id}
+              className="book"
+              style={{ "--book-color": bookColor(m.id) }}
+              href={m.url}
+              target="_blank"
+              rel="noreferrer"
+              title={m.title}
+            >
+              <button
+                type="button"
+                className="book-remove"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onRemove(m.id);
+                }}
+                aria-label={`удалить «${m.title}»`}
+              >
+                ✕
+              </button>
+            </a>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MaterialsLibrary() {
   const [items, setItems] = useState(null);
   const [title, setTitle] = useState("");
@@ -133,29 +183,17 @@ function MaterialsLibrary() {
   return (
     <section className="cabinet-section">
       <h2>библиотека материалов</h2>
-      <form className="material-row" onSubmit={add} style={{ marginBottom: 16 }}>
+      <Bookshelf items={items ?? []} onRemove={remove} />
+      <form className="material-row" onSubmit={add}>
         <input type="text" placeholder="название" value={title} onChange={(e) => setTitle(e.target.value)} />
         <input type="url" placeholder="ссылка" value={url} onChange={(e) => setUrl(e.target.value)} required />
-        <button type="submit">+ добавить</button>
+        <button type="submit">+ добавить книгу</button>
       </form>
-      {items === null ? (
-        <p className="cabinet-empty">Загрузка…</p>
-      ) : items.length === 0 ? (
-        <p className="cabinet-empty">Пока пусто — добавьте ссылки, которые часто используете, и потом выбирайте их прямо при создании урока.</p>
-      ) : (
-        <div className="lesson-materials">
-          {items.map((m) => (
-            <span className="library-item" key={m.id}>
-              <a href={m.url} target="_blank" rel="noreferrer">
-                {m.title}
-              </a>
-              <button type="button" onClick={() => remove(m.id)}>
-                ✕
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
+      <p className="bookshelf-hint">
+        {items === null
+          ? "Загрузка…"
+          : "Каждая добавленная ссылка появляется книгой на полке — наведите, чтобы увидеть название, кликните, чтобы открыть, крестик снимает книгу с полки."}
+      </p>
     </section>
   );
 }

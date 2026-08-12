@@ -320,38 +320,123 @@
   margin-left: auto;
 }
 
-/* -- materials library -- */
+/* -- materials library: a bookshelf, one book per material -- */
 
-.library-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 4px 6px 4px 12px;
+.bookshelf-wrap {
+  margin: 0 0 16px;
 }
 
-.library-item a {
-  color: var(--fg);
-  text-decoration: none;
+.bookshelf-frame {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: flex-end;
+  gap: 7px 6px;
+  min-height: 60px;
+  padding: 10px 10px 8px;
+  border: 3px solid #4a2f18;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #6b4423 0,
+      #6b4423 6px,
+      #8b5a2b 6px,
+      #8b5a2b 58px
+    );
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 
-.library-item a:hover {
-  color: var(--accent);
-}
-
-.library-item button {
+.bookshelf-empty {
+  margin: auto 4px;
   font-size: 12px;
-  color: var(--fg-dim);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 2px 4px;
+  line-height: 1.5;
+  color: rgba(244, 243, 239, 0.65);
 }
 
-.library-item button:hover {
-  color: var(--accent);
+.book {
+  position: relative;
+  flex: none;
+  display: block;
+  width: 28px;
+  height: 44px;
+  border: 2px solid rgba(0, 0, 0, 0.55);
+  border-radius: 1px 5px 5px 1px;
+  background:
+    linear-gradient(to right, rgba(255, 255, 255, 0.35) 0 3px, transparent 3px 100%),
+    linear-gradient(var(--book-color), var(--book-color));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 2px 0 rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.book::before,
+.book::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  right: 3px;
+  height: 2px;
+  background: rgba(212, 175, 55, 0.8);
+}
+
+.book::before {
+  top: 8px;
+}
+
+.book::after {
+  bottom: 8px;
+}
+
+.book:hover {
+  transform: translateY(-6px) rotate(-3deg);
+}
+
+.book-remove {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 16px;
+  height: 16px;
+  line-height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: 2px solid var(--bg);
+  font-size: 9px;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.book:hover .book-remove,
+.book-remove:focus-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.bookshelf-hint {
+  color: var(--fg-dim);
+  font-size: 12px;
+  margin: 10px 0 0;
+}
+
+/* On wide screens the shelf moves into the empty margin to the left of
+   the centered cabinet column instead of sitting inline — purely
+   decorative positioning, so it only kicks in once there's reliably
+   enough room (matches .cabinet-body's 900px max-width + some gap). */
+@media (min-width: 1360px) {
+  .bookshelf-wrap {
+    position: fixed;
+    left: max(16px, calc((100vw - 900px) / 2 - 230px));
+    top: 130px;
+    width: 210px;
+    max-height: calc(100vh - 170px);
+    overflow-y: auto;
+    margin: 0;
+  }
 }
 
 @media (max-width: 560px) {
