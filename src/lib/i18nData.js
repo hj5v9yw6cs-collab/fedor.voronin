@@ -74,6 +74,12 @@ export const DICT = {
       copyright: (year) => `© ${year} Fedor. English Studio`,
       privacy: "конфиденциальность",
       terms: "соглашение",
+      cookies: "cookie",
+    },
+    cookieBanner: {
+      text: "Сайт использует cookie для сбора статистики посещений (Яндекс.Метрика).",
+      linkText: "подробнее",
+      accept: "хорошо",
     },
   },
 
@@ -150,6 +156,12 @@ export const DICT = {
       copyright: (year) => `© ${year} Fedor. English Studio`,
       privacy: "privacy policy",
       terms: "terms of use",
+      cookies: "cookies",
+    },
+    cookieBanner: {
+      text: "This site uses cookies for visit analytics (Yandex.Metrika).",
+      linkText: "learn more",
+      accept: "got it",
     },
   },
 };
