@@ -60,6 +60,22 @@ export async function sendTestResults({ name, contact, score, total, level, answ
   const subject = `Результат теста — ${name || "аноним"} (${level.code})`;
 
   if (isCabinetEnabled) {
+    // Best-effort, doesn't gate the email below — this just lets a
+    // student see their own past attempts once they have a cabinet
+    // login (matched by this same contact email).
+    supabase
+      .from("test_results")
+      .insert({
+        name,
+        contact,
+        score,
+        total,
+        level_code: level.code,
+        level_label: level.label,
+        answers: withPicks,
+      })
+      .then(() => {});
+
     try {
       const { error } = await supabase.functions.invoke("send-email", {
         body: { to: OWNER_EMAIL, subject, text: ownerMessage },
