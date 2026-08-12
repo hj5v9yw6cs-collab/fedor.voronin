@@ -63,6 +63,10 @@ function sameDay(a, b) {
   return a && b && a.toDateString() === b.toDateString();
 }
 
+const ZOOM_MIN = 0.7;
+const ZOOM_MAX = 1.6;
+const ZOOM_STEP = 0.1;
+
 function Calendar({ onPickStudent }) {
   const [monthStart, setMonthStart] = useState(() => {
     const d = new Date();
@@ -70,6 +74,17 @@ function Calendar({ onPickStudent }) {
   });
   const [lessons, setLessons] = useState(null);
   const [selectedDay, setSelectedDay] = useState(() => new Date());
+  // Remembered per-browser, not per-account — it's a display preference,
+  // not data worth syncing anywhere.
+  const [zoom, setZoom] = useState(() => Number(localStorage.getItem("cabinetCalendarZoom")) || 1);
+
+  function changeZoom(delta) {
+    setZoom((z) => {
+      const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round((z + delta) * 10) / 10));
+      localStorage.setItem("cabinetCalendarZoom", String(next));
+      return next;
+    });
+  }
 
   useEffect(() => {
     const rangeStart = monthStart;
@@ -118,8 +133,17 @@ function Calendar({ onPickStudent }) {
         >
           →
         </button>
+        <span className="calendar-zoom">
+          <button type="button" onClick={() => changeZoom(-ZOOM_STEP)} disabled={zoom <= ZOOM_MIN}>
+            −
+          </button>
+          <button type="button" onClick={() => changeZoom(ZOOM_STEP)} disabled={zoom >= ZOOM_MAX}>
+            +
+          </button>
+        </span>
       </div>
 
+      <div style={{ zoom }}>
       <div className="calendar-weekdays">
         {["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map((d) => (
           <span key={d}>{d}</span>
@@ -173,6 +197,7 @@ function Calendar({ onPickStudent }) {
           )}
         </div>
       )}
+      </div>
     </section>
   );
 }
@@ -396,10 +421,6 @@ export default function TeacherView() {
     <>
       <Applications onApproved={() => loadStudents()} />
 
-      <Calendar onPickStudent={selectStudent} />
-
-      <MaterialsLibrary />
-
       {students.length === 0 ? (
         <p className="cabinet-empty">
           Пока нет учеников. Добавьте их в Supabase → Authentication → Users
@@ -418,6 +439,10 @@ export default function TeacherView() {
           ))}
         </div>
       )}
+
+      <Calendar onPickStudent={selectStudent} />
+
+      <MaterialsLibrary />
 
       {selected && (
         <section className="cabinet-section">
