@@ -17,6 +17,11 @@ export function AuthProvider({ children }) {
   // when the row genuinely wasn't found (or RLS denied it), so the UI
   // can say why instead of showing "loading" forever.
   const [fetchedProfile, setFetchedProfile] = useState({ id: null, profile: null, error: null });
+  // Supabase signs the visitor in with a temporary session the moment
+  // they land on the password-reset link, and fires this event instead
+  // of a normal sign-in — caught here so Cabinet.jsx can show a "set a
+  // new password" form instead of the regular logged-in view.
+  const [isRecovery, setIsRecovery] = useState(false);
 
   useEffect(() => {
     if (!isCabinetEnabled) return;
@@ -25,7 +30,8 @@ export function AuthProvider({ children }) {
       setSession(data.session);
       setSessionLoading(false);
     });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
+      if (event === "PASSWORD_RECOVERY") setIsRecovery(true);
       setSession(next);
     });
     return () => sub.subscription.unsubscribe();
@@ -57,9 +63,19 @@ export function AuthProvider({ children }) {
     profile,
     profileError,
     loading,
+    isRecovery,
     signIn: (email, password) =>
       supabase.auth.signInWithPassword({ email, password }),
     signOut: () => supabase.auth.signOut(),
+    requestPasswordReset: (email) =>
+      supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/cabinet`,
+      }),
+    completeRecovery: async (password) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (!error) setIsRecovery(false);
+      return { error };
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -4,6 +4,7 @@ import { useAuth } from "../lib/authData";
 import { isCabinetEnabled } from "../lib/supabase";
 import Flower from "../components/Flower";
 import LoginForm from "../components/cabinet/LoginForm";
+import PasswordReset from "../components/cabinet/PasswordReset";
 import StudentView from "../components/cabinet/StudentView";
 import TeacherView from "../components/cabinet/TeacherView";
 
@@ -22,7 +23,7 @@ function Shell({ children }) {
 }
 
 export default function Cabinet() {
-  const { enabled, loading, user, profile, profileError, signOut } = useAuth();
+  const { enabled, loading, user, profile, profileError, signOut, isRecovery } = useAuth();
 
   if (!isCabinetEnabled || !enabled) {
     return (
@@ -30,6 +31,14 @@ export default function Cabinet() {
         <p className="cabinet-note">
           Личный кабинет пока не настроен. Загляните позже.
         </p>
+      </Shell>
+    );
+  }
+
+  if (isRecovery) {
+    return (
+      <Shell>
+        <PasswordReset />
       </Shell>
     );
   }

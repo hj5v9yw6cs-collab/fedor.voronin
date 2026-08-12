@@ -19,6 +19,7 @@ function emptyLesson() {
     homework: "",
     teacher_comment: "",
     materials: [],
+    paid: false,
   };
 }
 
@@ -28,6 +29,10 @@ export default function LessonForm({ initial, onSave, onCancel }) {
       ? { ...initial, scheduled_at: toLocalInputValue(initial.scheduled_at) }
       : emptyLesson()
   );
+  // Only offered when creating a new lesson — repeating an edit to an
+  // existing one would be ambiguous (repeat from its original date, or
+  // from today?), so this stays out of the "initial" branch entirely.
+  const [repeatWeeks, setRepeatWeeks] = useState(1);
   const [busy, setBusy] = useState(false);
 
   function set(field, value) {
@@ -54,11 +59,20 @@ export default function LessonForm({ initial, onSave, onCancel }) {
     e.preventDefault();
     if (!form.scheduled_at) return;
     setBusy(true);
-    await onSave({
+    const base = {
       ...form,
-      scheduled_at: new Date(form.scheduled_at).toISOString(),
       materials: form.materials.filter((m) => m.url.trim()),
-    });
+    };
+    const startDate = new Date(form.scheduled_at);
+    const weeks = !initial && repeatWeeks > 1 ? repeatWeeks : 1;
+    for (let i = 0; i < weeks; i++) {
+      const at = new Date(startDate);
+      at.setDate(at.getDate() + i * 7);
+      // Sequential on purpose — each is an independent insert, and
+      // awaiting one at a time avoids firing a burst of simultaneous
+      // notification emails.
+      await onSave({ ...base, scheduled_at: at.toISOString() });
+    }
     setBusy(false);
   }
 
@@ -73,6 +87,18 @@ export default function LessonForm({ initial, onSave, onCancel }) {
           required
         />
       </label>
+
+      {!initial && (
+        <label>
+          Повторять каждую неделю
+          <select value={repeatWeeks} onChange={(e) => setRepeatWeeks(Number(e.target.value))}>
+            <option value={1}>не повторять</option>
+            <option value={4}>4 недели</option>
+            <option value={8}>8 недель</option>
+            <option value={12}>12 недель</option>
+          </select>
+        </label>
+      )}
 
       <label>
         Ссылка на Яндекс Телемост
@@ -133,6 +159,15 @@ export default function LessonForm({ initial, onSave, onCancel }) {
         <button type="button" className="material-add" onClick={addMaterial}>
           + добавить материал
         </button>
+      </label>
+
+      <label className="cabinet-checkbox-label">
+        <input
+          type="checkbox"
+          checked={form.paid}
+          onChange={(e) => set("paid", e.target.checked)}
+        />
+        оплачено
       </label>
 
       <div className="lesson-actions">

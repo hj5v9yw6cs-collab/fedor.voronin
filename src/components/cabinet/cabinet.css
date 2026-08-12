@@ -21,7 +21,8 @@
 
 .cabinet-login input,
 .cabinet-form input,
-.cabinet-form textarea {
+.cabinet-form textarea,
+.cabinet-form select {
   font-family: var(--font-mono);
   font-size: 15px;
   color: var(--fg);
@@ -33,9 +34,42 @@
 
 .cabinet-login input:focus,
 .cabinet-form input:focus,
-.cabinet-form textarea:focus {
+.cabinet-form textarea:focus,
+.cabinet-form select:focus {
   outline: none;
   border-color: var(--accent);
+}
+
+.cabinet-link {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-dim);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cabinet-link:hover {
+  color: var(--fg);
+}
+
+.cabinet-checkbox-label {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--fg-dim);
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.cabinet-checkbox-label input {
+  width: auto;
 }
 
 .cabinet-error {
@@ -237,4 +271,51 @@
 .lesson-actions button:hover {
   color: var(--fg);
   border-color: var(--fg-dim);
+}
+
+.lesson-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+/* -- week overview -- */
+
+.week-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--fg);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.week-item:hover {
+  color: var(--accent);
+}
+
+.week-item-date {
+  color: var(--fg-dim);
+  min-width: 160px;
+}
+
+.week-item-paid {
+  font-size: 11px;
+  color: var(--fg-dim);
+  margin-left: auto;
 }

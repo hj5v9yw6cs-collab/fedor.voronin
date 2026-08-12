@@ -11,7 +11,22 @@ function formatDate(iso) {
   });
 }
 
-function LessonCard({ lesson }) {
+function LessonCard({ lesson, editable, onChange }) {
+  const [message, setMessage] = useState(lesson.student_message || "");
+  const [saved, setSaved] = useState(false);
+
+  async function toggleDone(e) {
+    const homework_done = e.target.checked;
+    await supabase.from("lessons").update({ homework_done }).eq("id", lesson.id);
+    onChange({ ...lesson, homework_done });
+  }
+
+  async function saveMessage() {
+    await supabase.from("lessons").update({ student_message: message.trim() }).eq("id", lesson.id);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
   return (
     <div className="lesson-card">
       <div className="lesson-date">{formatDate(lesson.scheduled_at)}</div>
@@ -33,6 +48,13 @@ function LessonCard({ lesson }) {
         </div>
       )}
 
+      {lesson.homework && editable && (
+        <label className="cabinet-checkbox-label">
+          <input type="checkbox" checked={lesson.homework_done} onChange={toggleDone} />
+          домашнее задание выполнено
+        </label>
+      )}
+
       {lesson.teacher_comment && (
         <div className="lesson-row">
           <strong>Комментарий:</strong>
@@ -52,14 +74,61 @@ function LessonCard({ lesson }) {
           </div>
         </div>
       )}
+
+      {editable && (
+        <div className="material-row" style={{ marginTop: 10 }}>
+          <input
+            type="text"
+            placeholder="есть вопрос к преподавателю?"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <button type="button" onClick={saveMessage}>
+            {saved ? "отправлено ✓" : "отправить"}
+          </button>
+        </div>
+      )}
     </div>
+  );
+}
+
+function TestHistory({ email }) {
+  const [results, setResults] = useState(null);
+
+  useEffect(() => {
+    if (!email) return;
+    supabase
+      .from("test_results")
+      .select("*")
+      .eq("contact", email)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setResults(data ?? []));
+  }, [email]);
+
+  if (!results || results.length === 0) return null;
+
+  return (
+    <section className="cabinet-section">
+      <h2>история теста</h2>
+      {results.map((r) => (
+        <div className="lesson-card" key={r.id}>
+          <div className="lesson-date">
+            {new Date(r.created_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
+          </div>
+          <div className="lesson-row">
+            <strong>Результат:</strong>
+            {r.score}/{r.total} — уровень {r.level_code} ({r.level_label})
+          </div>
+        </div>
+      ))}
+    </section>
   );
 }
 
 export default function StudentView({ profile }) {
   const [split, setSplit] = useState(null); // { upcoming, past }, computed once per fetch
 
-  useEffect(() => {
+  function load() {
     supabase
       .from("lessons")
       .select("*")
@@ -73,7 +142,17 @@ export default function StudentView({ profile }) {
           past: lessons.filter((l) => new Date(l.scheduled_at).getTime() < now).reverse(),
         });
       });
-  }, [profile.id]);
+  }
+
+  useEffect(load, [profile.id]);
+
+  function patchLesson(updated) {
+    setSplit((prev) => {
+      if (!prev) return prev;
+      const patch = (list) => list.map((l) => (l.id === updated.id ? updated : l));
+      return { upcoming: patch(prev.upcoming), past: patch(prev.past) };
+    });
+  }
 
   if (split === null) return <p className="cabinet-empty">Загрузка занятий…</p>;
 
@@ -86,7 +165,9 @@ export default function StudentView({ profile }) {
         {upcoming.length === 0 ? (
           <p className="cabinet-empty">Пока ничего не запланировано.</p>
         ) : (
-          upcoming.map((l) => <LessonCard key={l.id} lesson={l} />)
+          upcoming.map((l) => (
+            <LessonCard key={l.id} lesson={l} editable onChange={patchLesson} />
+          ))
         )}
       </section>
 
@@ -94,10 +175,12 @@ export default function StudentView({ profile }) {
         <section className="cabinet-section">
           <h2>прошедшие занятия</h2>
           {past.map((l) => (
-            <LessonCard key={l.id} lesson={l} />
+            <LessonCard key={l.id} lesson={l} editable={false} onChange={patchLesson} />
           ))}
         </section>
       )}
+
+      <TestHistory email={profile.email} />
     </>
   );
 }

@@ -59,6 +59,113 @@ async function remindStudent(student, lesson) {
   }
 }
 
+function WeekOverview({ onPickStudent }) {
+  const [items, setItems] = useState(null);
+
+  useEffect(() => {
+    const now = new Date();
+    const in7days = new Date(now.getTime() + 7 * 24 * 3600 * 1000);
+    supabase
+      .from("lessons")
+      .select("*, profiles!lessons_student_id_fkey(id, full_name, email, contact)")
+      .gte("scheduled_at", now.toISOString())
+      .lte("scheduled_at", in7days.toISOString())
+      .order("scheduled_at", { ascending: true })
+      .then(({ data }) => setItems(data ?? []));
+  }, []);
+
+  if (items === null) return null;
+
+  return (
+    <section className="cabinet-section">
+      <h2>ближайшие 7 дней</h2>
+      {items.length === 0 ? (
+        <p className="cabinet-empty">На этой неделе занятий не запланировано.</p>
+      ) : (
+        items.map((l) => (
+          <button
+            key={l.id}
+            type="button"
+            className="week-item"
+            onClick={() => onPickStudent(l.profiles)}
+          >
+            <span className="week-item-date">{formatDate(l.scheduled_at)}</span>
+            <span className="week-item-student">
+              {l.profiles?.full_name || l.profiles?.email || "без имени"}
+            </span>
+            {l.paid && <span className="week-item-paid">оплачено</span>}
+          </button>
+        ))
+      )}
+    </section>
+  );
+}
+
+function Applications({ onApproved }) {
+  const [apps, setApps] = useState(null);
+  const [busyId, setBusyId] = useState(null);
+
+  function load() {
+    supabase
+      .from("applications")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .then(({ data }) => setApps(data ?? []));
+  }
+
+  useEffect(load, []);
+
+  async function approve(app) {
+    setBusyId(app.id);
+    const { error } = await supabase.functions.invoke("approve-application", {
+      body: { applicationId: app.id },
+    });
+    setBusyId(null);
+    if (error) {
+      window.alert("Не удалось одобрить заявку — проверьте, что Edge Function approve-application развёрнута (см. README).");
+      return;
+    }
+    load();
+    onApproved?.();
+  }
+
+  async function reject(app) {
+    if (!window.confirm("Отклонить эту заявку?")) return;
+    await supabase.from("applications").update({ status: "rejected" }).eq("id", app.id);
+    load();
+  }
+
+  if (!apps || apps.length === 0) return null;
+
+  return (
+    <section className="cabinet-section">
+      <h2>заявки на доступ</h2>
+      {apps.map((app) => (
+        <div className="lesson-card" key={app.id}>
+          <div className="lesson-date">{app.name || "без имени"}</div>
+          <div className="lesson-row">
+            <strong>Почта:</strong>
+            {app.contact_email}
+          </div>
+          {app.message && (
+            <div className="lesson-row">
+              <strong>Сообщение:</strong>
+              {app.message}
+            </div>
+          )}
+          <div className="lesson-actions">
+            <button onClick={() => approve(app)} disabled={busyId === app.id}>
+              {busyId === app.id ? "одобряем…" : "одобрить"}
+            </button>
+            <button onClick={() => reject(app)}>отклонить</button>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 export default function TeacherView() {
   const [students, setStudents] = useState(null);
   const [selected, setSelected] = useState(null);
@@ -67,6 +174,7 @@ export default function TeacherView() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [contactDraft, setContactDraft] = useState("");
+  const [notesDraft, setNotesDraft] = useState("");
   const [reminding, setReminding] = useState(null); // lesson id currently sending
   const [reminded, setReminded] = useState(null); // lesson id that just sent
 
@@ -90,7 +198,7 @@ export default function TeacherView() {
   async function saveProfile() {
     await supabase
       .from("profiles")
-      .update({ full_name: nameDraft.trim(), contact: contactDraft.trim() })
+      .update({ full_name: nameDraft.trim(), contact: contactDraft.trim(), teacher_notes: notesDraft.trim() })
       .eq("id", selected.id);
     setEditingProfile(false);
     loadStudents(selected.id);
@@ -107,6 +215,7 @@ export default function TeacherView() {
   }
 
   function selectStudent(student) {
+    if (!student) return;
     setSelected(student);
     setEditing(null);
     setEditingProfile(false);
@@ -148,28 +257,30 @@ export default function TeacherView() {
 
   if (students === null) return <p className="cabinet-empty">Загрузка учеников…</p>;
 
-  if (students.length === 0) {
-    return (
-      <p className="cabinet-empty">
-        Пока нет учеников. Добавьте их в Supabase → Authentication → Users
-        (см. README).
-      </p>
-    );
-  }
-
   return (
     <>
-      <div className="student-list">
-        {students.map((s) => (
-          <button
-            key={s.id}
-            className={`student-pill${selected?.id === s.id ? " is-active" : ""}`}
-            onClick={() => selectStudent(s)}
-          >
-            {s.full_name || s.email || s.contact || "без имени"}
-          </button>
-        ))}
-      </div>
+      <Applications onApproved={() => loadStudents()} />
+
+      <WeekOverview onPickStudent={selectStudent} />
+
+      {students.length === 0 ? (
+        <p className="cabinet-empty">
+          Пока нет учеников. Добавьте их в Supabase → Authentication → Users
+          (см. README) или дождитесь заявки выше.
+        </p>
+      ) : (
+        <div className="student-list">
+          {students.map((s) => (
+            <button
+              key={s.id}
+              className={`student-pill${selected?.id === s.id ? " is-active" : ""}`}
+              onClick={() => selectStudent(s)}
+            >
+              {s.full_name || s.email || s.contact || "без имени"}
+            </button>
+          ))}
+        </div>
+      )}
 
       {selected && (
         <section className="cabinet-section">
@@ -194,6 +305,14 @@ export default function TeacherView() {
                   onChange={(e) => setContactDraft(e.target.value)}
                 />
               </label>
+              <label>
+                Заметки (видны только вам)
+                <textarea
+                  placeholder="например: слабое место — времена"
+                  value={notesDraft}
+                  onChange={(e) => setNotesDraft(e.target.value)}
+                />
+              </label>
               <div className="lesson-actions">
                 <button type="button" className="btn-burst cabinet-submit" onClick={saveProfile}>
                   сохранить
@@ -214,6 +333,7 @@ export default function TeacherView() {
                   onClick={() => {
                     setNameDraft(selected.full_name || "");
                     setContactDraft(selected.contact || "");
+                    setNotesDraft(selected.teacher_notes || "");
                     setEditingProfile(true);
                   }}
                 >
@@ -224,6 +344,11 @@ export default function TeacherView() {
                 {selected.email}
                 {selected.contact ? ` · ${selected.contact}` : ""}
               </p>
+              {selected.teacher_notes && (
+                <p className="cabinet-note" style={{ fontSize: 13, fontStyle: "italic" }}>
+                  {selected.teacher_notes}
+                </p>
+              )}
             </div>
           )}
 
@@ -250,7 +375,11 @@ export default function TeacherView() {
                 />
               ) : (
                 <div className="lesson-card" key={l.id}>
-                  <div className="lesson-date">{formatDate(l.scheduled_at)}</div>
+                  <div className="lesson-date">
+                    {formatDate(l.scheduled_at)}
+                    {l.paid && <span className="lesson-badge">оплачено</span>}
+                    {l.homework_done && <span className="lesson-badge">дз готово</span>}
+                  </div>
                   {l.topic && <div className="lesson-topic">{l.topic}</div>}
                   {l.meeting_url && (
                     <div className="lesson-row">
@@ -258,6 +387,12 @@ export default function TeacherView() {
                       <a className="lesson-meet" href={l.meeting_url} target="_blank" rel="noreferrer">
                         Яндекс Телемост
                       </a>
+                    </div>
+                  )}
+                  {l.student_message && (
+                    <div className="lesson-row">
+                      <strong>Вопрос от ученика:</strong>
+                      {l.student_message}
                     </div>
                   )}
                   <div className="lesson-actions">
