@@ -59,150 +59,44 @@ async function remindStudent(student, lesson) {
   }
 }
 
-function sameDay(a, b) {
-  return a && b && a.toDateString() === b.toDateString();
-}
-
-const ZOOM_MIN = 0.5;
-const ZOOM_MAX = 1.6;
-const ZOOM_STEP = 0.1;
-const CALENDAR_BASE_WIDTH = 460; // px, at zoom = 1
-
-function Calendar({ onPickStudent }) {
-  const [monthStart, setMonthStart] = useState(() => {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1);
-  });
-  const [lessons, setLessons] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(() => new Date());
-  // Remembered per-browser, not per-account — it's a display preference,
-  // not data worth syncing anywhere.
-  const [zoom, setZoom] = useState(() => Number(localStorage.getItem("cabinetCalendarZoom")) || 1);
-
-  function changeZoom(delta) {
-    setZoom((z) => {
-      const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round((z + delta) * 10) / 10));
-      localStorage.setItem("cabinetCalendarZoom", String(next));
-      return next;
-    });
-  }
+function WeekOverview({ onPickStudent }) {
+  const [items, setItems] = useState(null);
 
   useEffect(() => {
-    const rangeStart = monthStart;
-    const rangeEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
+    const now = new Date();
+    const in7days = new Date(now.getTime() + 7 * 24 * 3600 * 1000);
     supabase
       .from("lessons")
       .select("*, profiles!lessons_student_id_fkey(id, full_name, email, contact)")
-      .gte("scheduled_at", rangeStart.toISOString())
-      .lt("scheduled_at", rangeEnd.toISOString())
+      .gte("scheduled_at", now.toISOString())
+      .lte("scheduled_at", in7days.toISOString())
       .order("scheduled_at", { ascending: true })
-      .then(({ data }) => setLessons(data ?? []));
-  }, [monthStart]);
+      .then(({ data }) => setItems(data ?? []));
+  }, []);
 
-  const byDay = {};
-  for (const l of lessons ?? []) {
-    const key = new Date(l.scheduled_at).toDateString();
-    (byDay[key] ??= []).push(l);
-  }
-
-  const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
-  // JS getDay() is Sunday-first (0..6) — shift so the grid starts on Monday.
-  const leadingBlank = (monthStart.getDay() + 6) % 7;
-  const cells = [
-    ...Array(leadingBlank).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => new Date(monthStart.getFullYear(), monthStart.getMonth(), i + 1)),
-  ];
-
-  const today = new Date();
-  const dayLessons = byDay[selectedDay?.toDateString()] ?? [];
+  if (items === null) return null;
 
   return (
     <section className="cabinet-section">
-      <div className="calendar-header">
-        <button
-          type="button"
-          onClick={() => setMonthStart(new Date(monthStart.getFullYear(), monthStart.getMonth() - 1, 1))}
-        >
-          ←
-        </button>
-        <h2 style={{ margin: 0 }}>
-          {monthStart.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}
-        </h2>
-        <button
-          type="button"
-          onClick={() => setMonthStart(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1))}
-        >
-          →
-        </button>
-        <span className="calendar-zoom">
-          <button type="button" onClick={() => changeZoom(-ZOOM_STEP)} disabled={zoom <= ZOOM_MIN}>
-            −
+      <h2>ближайшие 7 дней</h2>
+      {items.length === 0 ? (
+        <p className="cabinet-empty">На этой неделе занятий не запланировано.</p>
+      ) : (
+        items.map((l) => (
+          <button
+            key={l.id}
+            type="button"
+            className="week-item"
+            onClick={() => onPickStudent(l.profiles)}
+          >
+            <span className="week-item-date">{formatDate(l.scheduled_at)}</span>
+            <span className="week-item-student">
+              {l.profiles?.full_name || l.profiles?.email || "без имени"}
+            </span>
+            {l.paid && <span className="week-item-paid">оплачено</span>}
           </button>
-          <button type="button" onClick={() => changeZoom(ZOOM_STEP)} disabled={zoom >= ZOOM_MAX}>
-            +
-          </button>
-        </span>
-      </div>
-
-      {/* Scaling the grid's own max-width (rather than a CSS zoom/transform)
-          actually resizes the cells themselves, not just the text inside
-          them — zoom scaled font size fine but left the grid's physical
-          footprint on the page basically unchanged. */}
-      <div style={{ maxWidth: `${CALENDAR_BASE_WIDTH * zoom}px`, margin: "0 auto" }}>
-      <div className="calendar-weekdays">
-        {["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map((d) => (
-          <span key={d}>{d}</span>
-        ))}
-      </div>
-
-      <div className="calendar-grid">
-        {cells.map((d, i) => {
-          const count = d ? byDay[d.toDateString()]?.length : 0;
-          return (
-            <button
-              type="button"
-              key={i}
-              className={`calendar-cell${!d ? " is-empty" : ""}${sameDay(d, today) ? " is-today" : ""}${sameDay(d, selectedDay) ? " is-selected" : ""}`}
-              disabled={!d}
-              onClick={() => d && setSelectedDay(d)}
-            >
-              {d && (
-                <>
-                  <span className="calendar-daynum">{d.getDate()}</span>
-                  {count > 0 && <span className="calendar-dot">{count}</span>}
-                </>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {selectedDay && (
-        <div className="calendar-day-list">
-          <h3>{selectedDay.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}</h3>
-          {dayLessons.length === 0 ? (
-            <p className="cabinet-empty">Занятий нет.</p>
-          ) : (
-            dayLessons.map((l) => (
-              <button
-                key={l.id}
-                type="button"
-                className="week-item"
-                onClick={() => onPickStudent(l.profiles)}
-              >
-                <span className="week-item-date">
-                  {new Date(l.scheduled_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
-                </span>
-                <span className="week-item-student">
-                  {l.profiles?.full_name || l.profiles?.email || "без имени"}
-                </span>
-                {l.paid && <span className="week-item-paid">оплачено</span>}
-              </button>
-            ))
-          )}
-        </div>
+        ))
       )}
-      </div>
     </section>
   );
 }
@@ -445,7 +339,7 @@ export default function TeacherView() {
         </div>
       )}
 
-      <Calendar onPickStudent={selectStudent} />
+      <WeekOverview onPickStudent={selectStudent} />
 
       <MaterialsLibrary />
 
