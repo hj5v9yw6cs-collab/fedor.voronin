@@ -20,16 +20,26 @@ export default function StickerPhoto() {
 
         <svg
           className="arrow"
-          width="80"
-          height="30"
-          viewBox="0 0 80 30"
+          width="46"
+          height="40"
+          viewBox="0 0 46 40"
           fill="none"
         >
+          {/* Curves up toward the photo directly above this note,
+              ending in a small hook so it reads as an arrow, not just
+              a stray line. */}
           <path
-            d="M2 5 C25 8 45 12 72 24"
+            d="M4 36 C10 16 22 6 34 4"
             stroke="var(--fg-dim)"
             strokeWidth="1.5"
             strokeLinecap="round"
+          />
+          <path
+            d="M25 3 L34 4 L31 12"
+            stroke="var(--fg-dim)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
 
