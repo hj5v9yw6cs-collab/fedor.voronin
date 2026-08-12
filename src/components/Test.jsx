@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "./Test.css";
 import { QUESTIONS, getLevel } from "../lib/testQuestions";
 import { sendTestResults } from "../lib/sendResults";
@@ -9,8 +9,31 @@ import Ant from "./Ant";
 
 const EMPTY_ANSWERS = Array(QUESTIONS.length).fill(null);
 
-function ListenBlock({ text, listenLabel, listenAgainLabel }) {
+function ListenBlock({ text, audioSrc, listenLabel, listenAgainLabel }) {
   const [played, setPlayed] = useState(false);
+  const audioRef = useRef(null);
+
+  // Real recording, if this question has one — a genuine voice beats
+  // synthetic speech every time. speak() is only ever a fallback for
+  // questions that don't (yet) have one.
+  if (audioSrc) {
+    return (
+      <button
+        type="button"
+        className="test-listen btn-burst"
+        onClick={() => {
+          const audio = audioRef.current;
+          audio.currentTime = 0;
+          audio.play();
+          setPlayed(true);
+        }}
+      >
+        <audio ref={audioRef} src={audioSrc} preload="none" />
+        <span className="test-listen-icon">{played ? "↻" : "▶"}</span>
+        {played ? listenAgainLabel : listenLabel}
+      </button>
+    );
+  }
 
   if (!canSpeak) {
     // No speech synthesis in this browser — fall back to a transcript
@@ -161,6 +184,7 @@ export default function Test() {
                 <span className="test-kind">{t.kindListening}</span>
                 <ListenBlock
                   text={q.audioText}
+                  audioSrc={q.audioSrc}
                   listenLabel={t.listen}
                   listenAgainLabel={t.listenAgain}
                 />
