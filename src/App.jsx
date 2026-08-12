@@ -4,6 +4,7 @@ import Cabinet from "./pages/Cabinet";
 import { LanguageProvider } from "./lib/i18n";
 import { AuthProvider } from "./lib/auth";
 import { useYandexMetrikaPageviews } from "./lib/analytics";
+import CookieBanner from "./components/CookieBanner";
 
 // Route changes here are client-side (react-router's <Link>, no full
 // page reload), so Yandex.Metrika's own snippet only ever sees the
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="/cabinet" element={<Cabinet />} />
           </Routes>
         </BrowserRouter>
+        <CookieBanner />
       </AuthProvider>
     </LanguageProvider>
   );

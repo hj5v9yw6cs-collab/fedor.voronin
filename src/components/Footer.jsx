@@ -70,6 +70,8 @@ export default function Footer() {
           <a href="/privacy.html">{t.privacy}</a>
           <span>/</span>
           <a href="/terms.html">{t.terms}</a>
+          <span>/</span>
+          <a href="/cookies.html">{t.cookies}</a>
         </div>
 
         <div className="footer-lang">
