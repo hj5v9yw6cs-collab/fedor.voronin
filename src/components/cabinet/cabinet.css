@@ -346,6 +346,17 @@
   border-color: var(--fg-dim);
 }
 
+.calendar-header button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.calendar-zoom {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
