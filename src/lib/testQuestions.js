@@ -1,8 +1,13 @@
+import tomFlatAudio from "../assets/audio/tom-flat.m4a";
+import onTheFenceAudio from "../assets/audio/on-the-fence.m4a";
+
 // Compact CEFR-style placement quiz. Three question types:
 //  - "grammar": a sentence with a gap (as before)
 //  - "reading": a short passage + a comprehension question
-//  - "listening": a short line read aloud (via the browser's speech
-//    synthesis, see Test.jsx) + a comprehension question
+//  - "listening": a short line + a comprehension question. `audioSrc`
+//    is a real recording (see src/assets/audio); if a listening
+//    question has no audioSrc, Test.jsx falls back to reading
+//    `audioText` aloud with the browser's speech synthesis.
 // Each question adds at most 1 point; the final score maps to a level
 // via LEVELS below.
 export const QUESTIONS = [
@@ -42,6 +47,7 @@ export const QUESTIONS = [
     type: "listening",
     audioText:
       "Hi, this is Tom. I'm calling about the flat on Green Street. Is it still available? Please call me back at your earliest convenience.",
+    audioSrc: tomFlatAudio,
     q: "What is Tom asking about?",
     options: ["A job", "A flat", "A car", "A flight"],
     correct: 1,
@@ -76,6 +82,7 @@ export const QUESTIONS = [
     type: "listening",
     audioText:
       "Honestly, I was on the fence about the offer at first, but after thinking it over, I decided to go for it.",
+    audioSrc: onTheFenceAudio,
     q: "What does \"on the fence\" mean here?",
     options: ["Very excited", "Undecided", "Angry", "Confident"],
     correct: 1,
