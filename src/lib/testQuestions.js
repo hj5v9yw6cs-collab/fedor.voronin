@@ -1,5 +1,5 @@
-import tomFlatAudio from "../assets/audio/tom-flat.m4a";
-import onTheFenceAudio from "../assets/audio/on-the-fence.m4a";
+import tomFlatAudio from "../assets/audio/tom-flat.mp3";
+import onTheFenceAudio from "../assets/audio/on-the-fence.mp3";
 
 // Compact CEFR-style placement quiz. Three question types:
 //  - "grammar": a sentence with a gap (as before)
