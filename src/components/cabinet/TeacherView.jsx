@@ -59,43 +59,178 @@ async function remindStudent(student, lesson) {
   }
 }
 
-function WeekOverview({ onPickStudent }) {
-  const [items, setItems] = useState(null);
+function sameDay(a, b) {
+  return a && b && a.toDateString() === b.toDateString();
+}
+
+function Calendar({ onPickStudent }) {
+  const [monthStart, setMonthStart] = useState(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+  const [lessons, setLessons] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(() => new Date());
 
   useEffect(() => {
-    const now = new Date();
-    const in7days = new Date(now.getTime() + 7 * 24 * 3600 * 1000);
+    const rangeStart = monthStart;
+    const rangeEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
     supabase
       .from("lessons")
       .select("*, profiles!lessons_student_id_fkey(id, full_name, email, contact)")
-      .gte("scheduled_at", now.toISOString())
-      .lte("scheduled_at", in7days.toISOString())
+      .gte("scheduled_at", rangeStart.toISOString())
+      .lt("scheduled_at", rangeEnd.toISOString())
       .order("scheduled_at", { ascending: true })
-      .then(({ data }) => setItems(data ?? []));
-  }, []);
+      .then(({ data }) => setLessons(data ?? []));
+  }, [monthStart]);
 
-  if (items === null) return null;
+  const byDay = {};
+  for (const l of lessons ?? []) {
+    const key = new Date(l.scheduled_at).toDateString();
+    (byDay[key] ??= []).push(l);
+  }
+
+  const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+  // JS getDay() is Sunday-first (0..6) — shift so the grid starts on Monday.
+  const leadingBlank = (monthStart.getDay() + 6) % 7;
+  const cells = [
+    ...Array(leadingBlank).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => new Date(monthStart.getFullYear(), monthStart.getMonth(), i + 1)),
+  ];
+
+  const today = new Date();
+  const dayLessons = byDay[selectedDay?.toDateString()] ?? [];
 
   return (
     <section className="cabinet-section">
-      <h2>ближайшие 7 дней</h2>
-      {items.length === 0 ? (
-        <p className="cabinet-empty">На этой неделе занятий не запланировано.</p>
+      <div className="calendar-header">
+        <button
+          type="button"
+          onClick={() => setMonthStart(new Date(monthStart.getFullYear(), monthStart.getMonth() - 1, 1))}
+        >
+          ←
+        </button>
+        <h2 style={{ margin: 0 }}>
+          {monthStart.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}
+        </h2>
+        <button
+          type="button"
+          onClick={() => setMonthStart(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1))}
+        >
+          →
+        </button>
+      </div>
+
+      <div className="calendar-weekdays">
+        {["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map((d) => (
+          <span key={d}>{d}</span>
+        ))}
+      </div>
+
+      <div className="calendar-grid">
+        {cells.map((d, i) => {
+          const count = d ? byDay[d.toDateString()]?.length : 0;
+          return (
+            <button
+              type="button"
+              key={i}
+              className={`calendar-cell${!d ? " is-empty" : ""}${sameDay(d, today) ? " is-today" : ""}${sameDay(d, selectedDay) ? " is-selected" : ""}`}
+              disabled={!d}
+              onClick={() => d && setSelectedDay(d)}
+            >
+              {d && (
+                <>
+                  <span className="calendar-daynum">{d.getDate()}</span>
+                  {count > 0 && <span className="calendar-dot">{count}</span>}
+                </>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {selectedDay && (
+        <div className="calendar-day-list">
+          <h3>{selectedDay.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}</h3>
+          {dayLessons.length === 0 ? (
+            <p className="cabinet-empty">Занятий нет.</p>
+          ) : (
+            dayLessons.map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                className="week-item"
+                onClick={() => onPickStudent(l.profiles)}
+              >
+                <span className="week-item-date">
+                  {new Date(l.scheduled_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <span className="week-item-student">
+                  {l.profiles?.full_name || l.profiles?.email || "без имени"}
+                </span>
+                {l.paid && <span className="week-item-paid">оплачено</span>}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function MaterialsLibrary() {
+  const [items, setItems] = useState(null);
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+
+  function load() {
+    supabase
+      .from("materials")
+      .select("*")
+      .order("title")
+      .then(({ data }) => setItems(data ?? []));
+  }
+
+  useEffect(load, []);
+
+  async function add(e) {
+    e.preventDefault();
+    if (!url.trim()) return;
+    await supabase.from("materials").insert({ title: title.trim() || url.trim(), url: url.trim() });
+    setTitle("");
+    setUrl("");
+    load();
+  }
+
+  async function remove(id) {
+    await supabase.from("materials").delete().eq("id", id);
+    load();
+  }
+
+  return (
+    <section className="cabinet-section">
+      <h2>библиотека материалов</h2>
+      <form className="material-row" onSubmit={add} style={{ marginBottom: 16 }}>
+        <input type="text" placeholder="название" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input type="url" placeholder="ссылка" value={url} onChange={(e) => setUrl(e.target.value)} required />
+        <button type="submit">+ добавить</button>
+      </form>
+      {items === null ? (
+        <p className="cabinet-empty">Загрузка…</p>
+      ) : items.length === 0 ? (
+        <p className="cabinet-empty">Пока пусто — добавьте ссылки, которые часто используете, и потом выбирайте их прямо при создании урока.</p>
       ) : (
-        items.map((l) => (
-          <button
-            key={l.id}
-            type="button"
-            className="week-item"
-            onClick={() => onPickStudent(l.profiles)}
-          >
-            <span className="week-item-date">{formatDate(l.scheduled_at)}</span>
-            <span className="week-item-student">
-              {l.profiles?.full_name || l.profiles?.email || "без имени"}
+        <div className="lesson-materials">
+          {items.map((m) => (
+            <span className="library-item" key={m.id}>
+              <a href={m.url} target="_blank" rel="noreferrer">
+                {m.title}
+              </a>
+              <button type="button" onClick={() => remove(m.id)}>
+                ✕
+              </button>
             </span>
-            {l.paid && <span className="week-item-paid">оплачено</span>}
-          </button>
-        ))
+          ))}
+        </div>
       )}
     </section>
   );
@@ -261,7 +396,9 @@ export default function TeacherView() {
     <>
       <Applications onApproved={() => loadStudents()} />
 
-      <WeekOverview onPickStudent={selectStudent} />
+      <Calendar onPickStudent={selectStudent} />
+
+      <MaterialsLibrary />
 
       {students.length === 0 ? (
         <p className="cabinet-empty">

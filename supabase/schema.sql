@@ -178,6 +178,25 @@ create policy "applications: teacher updates all"
   using (is_teacher())
   with check (is_teacher());
 
+-- Reusable materials (worksheets, links) the teacher can pick from
+-- instead of retyping title+url on every lesson. Picking one just
+-- copies its title/url into that lesson's own `materials` jsonb array
+-- (see lessons table above) — this table is only the reusable source
+-- list, not what's rendered in a student's view of a lesson.
+create table if not exists materials (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  url text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table materials enable row level security;
+
+create policy "materials: teacher manages all"
+  on materials for all
+  using (is_teacher())
+  with check (is_teacher());
+
 -- Automatic reminder emails, ~5 hours before each lesson. Requires the
 -- pg_cron and pg_net extensions (Database → Extensions → enable both),
 -- then run this once — it schedules a call to the send-reminders Edge

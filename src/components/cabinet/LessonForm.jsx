@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 import "./cabinet.css";
 
 // <input type="datetime-local"> works in the visitor's local time and
@@ -34,6 +35,15 @@ export default function LessonForm({ initial, onSave, onCancel }) {
   // from today?), so this stays out of the "initial" branch entirely.
   const [repeatWeeks, setRepeatWeeks] = useState(1);
   const [busy, setBusy] = useState(false);
+  const [library, setLibrary] = useState([]);
+
+  useEffect(() => {
+    supabase
+      .from("materials")
+      .select("*")
+      .order("title")
+      .then(({ data }) => setLibrary(data ?? []));
+  }, []);
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -49,6 +59,12 @@ export default function LessonForm({ initial, onSave, onCancel }) {
 
   function addMaterial() {
     setForm((f) => ({ ...f, materials: [...f.materials, { title: "", url: "" }] }));
+  }
+
+  function addFromLibrary(id) {
+    const item = library.find((m) => m.id === id);
+    if (!item) return;
+    setForm((f) => ({ ...f, materials: [...f.materials, { title: item.title, url: item.url }] }));
   }
 
   function removeMaterial(i) {
@@ -156,9 +172,26 @@ export default function LessonForm({ initial, onSave, onCancel }) {
             </button>
           </div>
         ))}
-        <button type="button" className="material-add" onClick={addMaterial}>
-          + добавить материал
-        </button>
+        <div className="material-row">
+          <button type="button" className="material-add" onClick={addMaterial}>
+            + добавить материал
+          </button>
+          {library.length > 0 && (
+            <select
+              value=""
+              onChange={(e) => {
+                if (e.target.value) addFromLibrary(e.target.value);
+              }}
+            >
+              <option value="">+ добавить из библиотеки</option>
+              {library.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.title}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
       </label>
 
       <label className="cabinet-checkbox-label">
