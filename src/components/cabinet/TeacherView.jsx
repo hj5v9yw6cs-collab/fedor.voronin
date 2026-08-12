@@ -375,8 +375,6 @@ export default function TeacherView() {
 
       <WeekOverview onPickStudent={selectStudent} />
 
-      <MaterialsLibrary />
-
       {selected && (
         <section className="cabinet-section">
           {editingProfile ? (
@@ -503,6 +501,8 @@ export default function TeacherView() {
           )}
         </section>
       )}
+
+      <MaterialsLibrary />
     </>
   );
 }
